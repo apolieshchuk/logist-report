@@ -232,7 +232,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
                 # Ячейка добавленния в базу REPTABLE
                 selected_date = self.dial_route_info.date_edit.date()
-                date = selected_date.toString("d.MMM.yy")
+                date = selected_date.toString("yyyy-MM-dd")
                 manager = self.dial_route_info.manager_box.currentText()
                 crop = self.dial_route_info.crop_box.currentText()
                 go_report = []
@@ -249,7 +249,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                     # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-surname
                     # 7- f2, 8-f1, 9-tr,
 
-                    DB.exec(f"""INSERT INTO reptable(date,manager,route,crop,carrier,auto_num,surname,f2,f1,tr) VALUES (
+                    DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,surname,f2,f1,tr) VALUES (
                                       '{el[0]}',
                                       '{el[1]}',
                                       '{el[2]}',

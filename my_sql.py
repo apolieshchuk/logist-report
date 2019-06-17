@@ -40,8 +40,8 @@ class My_Sql():
         report = My_Sql.csv_to_list(csv)
         print(report[1])
         for el in report:
-            db.exec(f"""INSERT INTO reptable(date,manager,route,crop,carrier,auto_num,surname,f2,f1,tr) VALUES (
-                                                  '{el['date']}',
+            db.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,surname,f2,f1,tr) VALUES (
+                                                  '{el['route_date']}',
                                                   '{el['manager']}',
                                                   '{el['route']}',
                                                   '{el['crop']}',
@@ -56,11 +56,30 @@ class My_Sql():
 
     @staticmethod
     def data_format_in_db(db):
-        sql = [
-            f"UPDATE reptable SET date = REPLACE(date,'июнь','июн')",
-            f"UPDATE reptable SET date = REPLACE(date,'февр','фев')",
-            f"UPDATE reptable SET date = REPLACE(date,'март','мар')"
-        ]
+        sql = None
+
+        # 1
+        # sql = [
+        #     "UPDATE reptable SET route_date = REPLACE(route_date,'янв','01')",
+        #     "UPDATE reptable SET route_date = REPLACE(route_date,'фев','02')",
+        #     "UPDATE reptable SET route_date = REPLACE(route_date,'апр','04')",
+        #     "UPDATE reptable SET route_date = REPLACE(route_date,'май','05')",
+        #     "UPDATE reptable SET route_date = REPLACE(route_date,'июн','06')",
+        #     "UPDATE reptable SET route_date = REPLACE(route_date,'мар','03')",
+        #     "UPDATE reptable SET route_date = '20'||substr(route_date,7,2)||'-'||substr(route_date,4,2)||'-'||substr(route_date,1,2)"
+        # ]
+
+        # 2
+        # sql = ["UPDATE reptable SET route_date = strftime('%Y-%m-%d',route_date)"]
+
+        # 3
+        # sql = [
+        #     f"UPDATE reptable SET route_date = REPLACE(route_date,'июнь','июн')",
+        #     f"UPDATE reptable SET route_date = REPLACE(route_date,'февр','фев')",
+        #     f"UPDATE reptable SET route_date = REPLACE(route_date,'март','мар')"
+        # ]
+
+
         for el in sql:
             db.exec(el)
         db.commit()

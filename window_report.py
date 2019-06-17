@@ -12,6 +12,18 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # и т.д. в файле design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+
+        # устанавливаем диапазон дат
+        date1 = QtCore.QDate.currentDate().addMonths(-1)
+        date2 = QtCore.QDate.currentDate()
+        self.dateEdit.setDate(date1)
+        self.dateEdit_2.setDate(date2)
+
+
+
+
+
+        # Создаем таблицу за определенную дату
         self.create_table_model()
         self.create_table_view()
 
@@ -21,9 +33,10 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # двигаем колонки на фильтрах и в основной табилце
         self.move_view_columns(self.table_view,self.filter_box.filter_view)
 
+
+
         #TODO вывод в иксель
         #TODO отчет выводится за диапазон
-        #TODO прокрутить скрол до конца
 
 
     def create_table_model(self):
@@ -36,6 +49,13 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.table_model.setTable("reptable")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()
+
+        !!!sql = DB.exec("SELECT route_date FROM reptable WHERE route_date > date('now')")
+        print("OK!!!")
+        while sql.next():
+            print(f"{sql.value(0)}")
+
+        # DB.exec("UPDATE reptable SET route_date = CONVERT(varchar,route_date,106) WHERE id = 2190")
 
         # создаем горизонтальную шапку
         for col in range(self.table_model.columnCount()):
