@@ -13,19 +13,24 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
 
-        # устанавливаем диапазон дат
-        date1 = QtCore.QDate.currentDate().addMonths(-1)
+
+        # Создаем таблицу
+        self.create_table_model()
+        self.create_table_view()
+
+        # TODO вынести в функцию
+        # устанавливаем диапазон дат по умолчанию
+        date1 = QtCore.QDate.currentDate().addMonths(-3)
         date2 = QtCore.QDate.currentDate()
         self.dateEdit.setDate(date1)
         self.dateEdit_2.setDate(date2)
+        # слушатели диапазона дат
+        self.dateEdit.dateChanged.connect(self.start_date_edit)
+        self.dateEdit_2.dateChanged.connect(self.start_date_edit)
+        # фильтруем по установленному диапазону дат
+        self.start_date_edit()
 
 
-
-
-
-        # Создаем таблицу за определенную дату
-        self.create_table_model()
-        self.create_table_view()
 
         # создаем фильтр боксы
         self.filter_box = FilterBoxes(self.filter_view,self.table_view)
@@ -40,20 +45,21 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
 
     def create_table_model(self):
+        from window_main import DB
 
-        # ------------- МОДЕЛЬ---------------------
+        # фильтруем модель за период
+        # sql_model = DB.exec(f"SELECT * FROM reptable WHERE route_date BETWEEN"
+        #                     f" '{self.date1}' AND '{self.date2}'")
 
         # создаем модель таблицы
-        from window_main import DB
+        # self.table_model = QtSql.QSqlQueryModel()
+        # self.table_model.setQuery(sql_model)
         self.table_model = QtSql.QSqlTableModel(None, DB)
         self.table_model.setTable("reptable")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()
 
-        !!!sql = DB.exec("SELECT route_date FROM reptable WHERE route_date > date('now')")
-        print("OK!!!")
-        while sql.next():
-            print(f"{sql.value(0)}")
+
 
         # DB.exec("UPDATE reptable SET route_date = CONVERT(varchar,route_date,106) WHERE id = 2190")
 
@@ -93,4 +99,13 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
             el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Менеджер"), 2)
             el.horizontalHeader().moveSection(COLUMNS_REPORT.index("гос.№"), 5)
             el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Культура"), 3)
+
+    def start_date_edit(self):
+        self.date1 = self.dateEdit.date().toString("yyyy-MM-dd")
+        self.date2 = self.dateEdit_2.date().toString("yyyy-MM-dd")
+
+        # ФИЛЬТРАЦИЯ МОДЕЛИ!
+        self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}'")
+        # self.table_model.select()
+
 
