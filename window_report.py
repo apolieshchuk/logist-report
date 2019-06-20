@@ -79,19 +79,20 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
-        # Расширяем окно, согласно длинны таблицы
-        table_width = table_size(self.table_view)
-        # устанавливаем ширину окна
-        # TODO непонятно почему узко считает ширину окна
-        self.setFixedWidth(table_width+30)
 
         # включаем сортировку
         # TODO сортировка по дате
-        self.table_view.sortByColumn(COLUMNS_REPORT.index("id"), QtCore.Qt.DescendingOrder)
+        self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
+        # self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
 
         # расширяем строки
         self.table_view.resizeColumnsToContents()
         self.table_view.resizeRowsToContents()
+
+        # Расширяем окно, согласно длинны таблицы
+        table_width = table_size(self.table_view)
+        # устанавливаем ширину окна
+        self.setFixedWidth(table_width)
 
     def move_view_columns(self,*views):
         # TODO автоматическое подтягивание индекса колонки с SQL
@@ -107,6 +108,6 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # ФИЛЬТРАЦИЯ МОДЕЛИ!
         self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}'")
-        # self.table_model.select()
+        self.table_view.resizeRowsToContents()
 
 

@@ -13,6 +13,7 @@ def main():
     window = LogistReportWindow()  # Создаём объект класса ReportWindow
     window.show()  # Показываем окно
     app.exec_()  # и запускаем приложение
+    # TODO рахунки
 
 
 

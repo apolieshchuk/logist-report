@@ -74,7 +74,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             self.table_model.setHeaderData(col, QtCore.Qt.Horizontal, COLUMNS_MAIN[col])
 
     def create_table_view(self):
-        # ------------- ВИЗУАЛИЗАЦИЯ---------------------
 
         # вставляем модель в tableview
         self.table_view.setModel(self.table_model)
@@ -117,7 +116,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # включаем сортировку
         self.table_view.sortByColumn(COLUMNS_MAIN.index("Назва"), QtCore.Qt.AscendingOrder)
 
-        # расширяем строки по содержимому
+        # удлиняем строки по содержимому
         self.table_view.resizeRowsToContents()
 
     def table_clicked(self, index_in_view):
@@ -213,6 +212,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             self.table_model.select()
 
     def go_auto(self):
+        # TODO Укоротить функцию
+
         checked_ids = self.get_checked_ids()
 
         if checked_ids:  # если выбран хоть один авто
@@ -244,38 +245,40 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                     # if debug:
                         # for el in info: print(el)
 
-                # Ячейка добавленния в базу REPTABLE
-                selected_date = self.dial_route_info.date_edit.date()
-                date = selected_date.toString("yyyy-MM-dd")
-                manager = self.dial_route_info.manager_box.currentText()
-                crop = self.dial_route_info.crop_box.currentText()
-                go_report = []
-                for el in info:
-                    go_report.append([date] + [manager] + [route] + [crop] + el)  # создаем строку в базу reptable
-                if debug: [print(i) for i in go_report]
+                    # Ячейка добавленния в базу REPTABLE
+                    selected_date = self.dial_route_info.date_edit.date()
+                    date = selected_date.toString("yyyy-MM-dd")
+                    manager = self.dial_route_info.manager_box.currentText()
+                    crop = self.dial_route_info.crop_box.currentText()
+                    go_report = []
+                    for el in info:
+                        go_report.append([date] + [manager] + [route] + [crop] + el)  # создаем строку в базу reptable
+                    if debug: [print(i) for i in go_report]
 
-                # дополнительно копируем в буфер инфо по загрузке
-                self.copy_in_bufer(date,route) # Дата и маршрут
+                    # дополнительно копируем в буфер инфо по загрузке
+                    self.copy_in_bufer(date,route) # Дата и маршрут
 
-                # вставляем в БД строку
-                for el in go_report:
-                    # format go_report:
-                    # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-surname
-                    # 7- f2, 8-f1, 9-tr,
+                    # вставляем в БД строку
+                    for el in go_report:
+                        # format go_report:
+                        # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-surname
+                        # 7-tel 8- f2, 9-f1, 10-tr,
 
-                    DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,surname,f2,f1,tr) VALUES (
-                                      '{el[0]}',
-                                      '{el[1]}',
-                                      '{el[2]}',
-                                      '{el[3]}',
-                                      '{el[4]}',
-                                      '{el[5]}',
-                                      '{el[6]}',
-                                      '{el[7]}',
-                                      '{el[8]}',
-                                      '{el[9]}'
-                                  )""")
-                    DB.commit()
+                        DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,surname,tel,f2,f1,tr) VALUES (
+                                          '{el[0]}',
+                                          '{el[1]}',
+                                          '{el[2]}',
+                                          '{el[3]}',
+                                          '{el[4]}',
+                                          '{el[5]}',
+                                          '{el[6]}',
+                                          '{el[7]}',
+                                          '{el[8]}',
+                                          '{el[9]}',
+                                          '{el[10]}'
+                                      )""")
+                        DB.commit()
+                    self.clear_check_and_filters()
 
     def do_report(self):
         self.report_window = ReportWindow()

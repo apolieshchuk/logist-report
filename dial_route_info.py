@@ -80,6 +80,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
 
         # Скрываем колонку ID
         self.table_view.hideColumn(0)
+        self.table_view.hideColumn(4)
 
         # вставляем виджеты
         # инпут филды
