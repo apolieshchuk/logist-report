@@ -39,6 +39,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                 self.crop_box.setCurrentIndex(ind)
         except:
             print("PASS Except!")
+            #TODO автовыбор тарифа и трансформации
 
     def create_table_model(self):
         from window_main import DB
