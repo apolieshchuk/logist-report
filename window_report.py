@@ -99,6 +99,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
             el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Менеджер"), 2)
             el.horizontalHeader().moveSection(COLUMNS_REPORT.index("гос.№"), 5)
             el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Культура"), 3)
+            el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Тел"), 8)
 
     def start_date_edit(self):
         self.date1 = self.dateEdit.date().toString("yyyy-MM-dd")

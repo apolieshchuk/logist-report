@@ -13,16 +13,17 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         super().__init__()
         self.id_set = id_set
         self.setupUi(self)
+        self.route = route
         self.create_table_model()
         self.create_table_view()
-        self.route = route
+
 
         self.date_edit.setDate(QtCore.QDate.currentDate())
 
         self.manager_box.addItems(sorted(MANAGERS))
         # устанавливаем значение основного менеджера
         try:
-            manager = self.items_on_route("manager")
+            manager = self.most_used_on_route("manager")
             ind = self.manager_box.findText(manager)
             if  ind != -1:
                 self.manager_box.setCurrentIndex(ind)
@@ -33,7 +34,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         self.crop_box.addItems(CROPS)
         # устанавливаем значение основной культуры на маршруте
         try:
-            crop = self.items_on_route("crop")
+            crop = self.most_used_on_route("crop")
             ind = self.crop_box.findText(crop)
             if  ind != -1:
                 self.crop_box.setCurrentIndex(ind)
@@ -57,11 +58,11 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
             sql = DB.exec(f"SELECT * FROM mytable WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
             sql.next()
-            row = []
 
             # формируем колонки которые заданы шаблоном
+            row = []
             for el in ROUTE_INFO_PATTERN:
-                item = QtGui.QStandardItem(str(sql.value(el)))
+                item = QtGui.QStandardItem(sql.value(el))
                 item.setEditable(False)
                 row.append(item)
             self.table_model.appendRow(row)
@@ -85,11 +86,16 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         text_inputs = []
         text_inputs.append(COLUMNS_ROUTE_INFO.index("ф1"))
         text_inputs.append(COLUMNS_ROUTE_INFO.index("ф2"))
+        print()
         for col in text_inputs:  # bc checkbox "CHECKBOX_INDEX" col
             for row in range(self.table_model.rowCount()):
                 inp_text = MyLineEdit(self, row, col)
                 inp_text.setFixedWidth(self.table_view.columnWidth(col))
                 inp_text.setFixedHeight(self.table_view.rowHeight(row))
+                if col == COLUMNS_ROUTE_INFO.index("ф1"):
+                    inp_text.setText(str(self.most_used_on_route('f1')))
+                elif col == COLUMNS_ROUTE_INFO.index("ф2"):
+                    inp_text.setText(str(self.most_used_on_route('f2')))
                 # добавляем его в таблицу
                 self.table_view.setIndexWidget(self.table_model.index(row, col), inp_text)
 
@@ -99,6 +105,11 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
             lst_widg = QtWidgets.QComboBox()
             lst_widg.addItem("НЕТ")
             lst_widg.addItem("ДА")
+            # устанавливаем значение трансформации на маршруте
+            tr = self.most_used_on_route("tr")
+            ind = lst_widg.findText(tr)
+            if ind != -1:
+                lst_widg.setCurrentIndex(ind)
             lst_widg.setFixedWidth(self.table_view.columnWidth(col))
             lst_widg.setFixedHeight(self.table_view.rowHeight(row))
             # добавляем его в таблицу
@@ -107,9 +118,10 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
-    def items_on_route(self, item):
+    def most_used_on_route(self, item, limit = -1 ):
+        # limit - количество ПОСЛЕДНИХ по ID записей
         from window_main import DB
-        sql = DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'")
+        sql = DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}' ORDER BY id DESC LIMIT {limit} ")
         dict = {}
         while sql.next():
             val = sql.value(item)
@@ -120,8 +132,6 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         sorted_dict = sorted(dict.items(), key=operator.itemgetter(1), reverse= True)
         if debug: print (sorted_dict)
         return sorted_dict[0][0]
-
-
 
 class MyLineEdit(QtWidgets.QLineEdit):
 

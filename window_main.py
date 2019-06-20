@@ -33,9 +33,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             # и т.д. в файле design.py
             super().__init__()
             self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-            # self.report_window = ReportWindow()
-
-            self.checked_ids = set()  # переменная для хранения выделенных рядков
 
             self.create_table_model()  # Функция которая вносит базу данных в QStandartItemModel
             self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
@@ -124,8 +121,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_view.resizeRowsToContents()
 
     def table_clicked(self, index_in_view):
-        if index_in_view.column() == COLUMNS_MAIN.index("V"):
-            print(self.table_model.checkeable_data)
+        pass
+        # if index_in_view.column() == COLUMNS_MAIN.index("V"):
+        #     print(self.table_model.checkeable_data)
         # if index_in_view.column() == COLUMNS_MAIN.index("V"):
         #     print(self.table_model.checkeable_data)
         #     # берем текущую VIEW модель (на случай фильтра в том числе)
@@ -169,14 +167,14 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             widg.filter_default_viewset(self.table_view)
 
         # пересоздаем окно и обнуляем список выделения
-        self.checked_ids = set()
         self.table_model.select()
         self.table_view.setModel(self.table_model)
 
     def copy_in_bufer(self,*info):
         buf = ""
         c = 1
-        for id in self.checked_ids:
+
+        for id in self.get_checked_ids():
             # формируем sql запрос
             sql = DB.exec(f"SELECT * FROM mytable WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
@@ -215,8 +213,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             self.table_model.select()
 
     def go_auto(self):
+        checked_ids = self.get_checked_ids()
 
-        if self.checked_ids:  # если выбран хоть один авто
+        if checked_ids:  # если выбран хоть один авто
             # Окно с выбором маршрута
             self.dial_routes = RoutesWindow()
             if self.dial_routes.exec_(): # если выбран маршрут
@@ -228,7 +227,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
                 # TODO если инфо нажмут КЕНСЕЛ, вернутся к окну маршрутов
                 # Запрашиваем инфо по загрузке
-                self.dial_route_info = RouteInfo(self.checked_ids,route)
+                self.dial_route_info = RouteInfo(checked_ids,route)
                 if self.dial_route_info.exec_():  # Только если нажимаем ОК
                     info_table = self.dial_route_info.table_view
                     for row in range(info_table.model().rowCount()):
@@ -283,6 +282,14 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.report_window.show()
 
     # ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ
+    def get_checked_ids(self):
+        s = set()
+        data_in_checkbox = self.table_model.checkeable_data.items()
+        for row,checked in data_in_checkbox:
+            if checked:
+                id = self.table_model.index(row, 0).data()
+                s.add(id)
+        return s
 
     def copy_view_settings(self, giver_view, taker_view):
 
