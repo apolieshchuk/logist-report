@@ -27,7 +27,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
 
             # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
-            # My_Sql.data_format_in_db(DB)
+            # My_Sql.data_format_in_db
 
             # Это здесь нужно для доступа к переменным, методам
             # и т.д. в файле design.py
@@ -65,10 +65,12 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # TODO сортировка украинских букв
 
         # создаем модель таблицы
-        self.table_model = QtSql.QSqlTableModel(None, DB)
+        self.table_model = MySqlTableModel(None, DB)
         self.table_model.setTable("mytable")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()
+
+        print(self.table_model.checkeable_data)
 
         # создаем горизонтальную шапку
         for col in range(self.table_model.columnCount()):
@@ -93,12 +95,13 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # Скрываем колонку ID
         self.table_view.hideColumn(0)
 
+
         # меняем колонки местами (чекбокс вперед)
         # self.table_view.horizontalHeader().moveSection(CHECKBOX_COLUMN, 0)
 
-        # создаем чекбокс
-        delegate = CheckBoxDelegate(None)
-        self.table_view.setItemDelegateForColumn(COLUMNS_MAIN.index("V"), delegate)
+        # создаем чекбокс Делегат
+        # delegate = CheckBoxDelegate(None)
+        # self.table_view.setItemDelegateForColumn(COLUMNS_MAIN.index("V"), delegate)
 
         # делаем слушатели tableview
         self.table_view.clicked.connect(self.table_clicked)
@@ -123,27 +126,31 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
 
     def table_clicked(self, index_in_view):
+        print(self.table_model.checkeable_data)
         # ПРОРАБОТАТЬ ЕСЛИ КОЛОНКА УДАЛИТСЯ!!
         # При клике на флажок добавляет рядок в "отмеченные"
-        if index_in_view.column() == COLUMNS_MAIN.index("V"):  # если кликают на колонку checkbox
-            # берем текущую VIEW модель (на случай фильтра в том числе)
-            model = self.table_view.model()
-            # берем нужную клетку с уникальным полем "id"
-            cell = model.index(index_in_view.row(), 0)
-            # считываем уникальный ID
-            id = cell.data()
-
-            if index_in_view.data():  # если колонка чекбокса - НЕ 0
-                self.checked_ids.add(id)
-            else:
-                self.checked_ids.remove(id)
-            if debug: print("Checked rows", self.checked_ids)
+        # if index_in_view.column() == COLUMNS_MAIN.index("V"):  # если кликают на колонку checkbox
+        #     # берем текущую VIEW модель (на случай фильтра в том числе)
+        #     model = self.table_view.model()
+        #     # берем нужную клетку с уникальным полем "id"
+        #     cell = model.index(index_in_view.row(), 0)
+        #     # считываем уникальный ID
+        #     id = cell.data()
+        #
+        #     if index_in_view.data():  # если колонка чекбокса - НЕ 0
+        #         self.checked_ids.add(id)
+        #     else:
+        #         self.checked_ids.remove(id)
+        #     if debug: print("Checked rows", self.checked_ids)
 
     # КНОПКИ ГЛАВНОГО ОКНА
     def clear_check_and_filters(self):
 
         # Убираем выделение с строк
-        DB.exec("UPDATE mytable SET chk=0 WHERE chk = 1")
+        # DB.exec("UPDATE mytable SET chk=0 WHERE chk = 1")
+        # TODO проходит весь словарь, желательно точечно
+        for k,v in self.table_model.checkeable_data.items():
+            self.table_model.checkeable_data[k] = 0
 
         # убираем фильтр с колонок
         for col in range(2, self.filter_box.filter_model.columnCount()):
@@ -318,44 +325,33 @@ class MyLineEdit(QtWidgets.QLineEdit):
             self.window.filter_default_viewset(self)
         super(MyLineEdit, self).focusOutEvent(event)
 
-class CheckBoxDelegate(QtWidgets.QItemDelegate):
-    """
-    A delegate that places a fully functioning QCheckBox cell of the column to which it's applied.
-    """
+class MySqlTableModel(QtSql.QSqlTableModel):
 
-    def __init__(self, parent):
-        QtWidgets.QItemDelegate.__init__(self, parent)
+    def __init__(self, *args, **kwargs):
+        QtSql.QSqlTableModel.__init__(self, *args, **kwargs)
+        self.checkeable_data = {}
 
-    def createEditor(self, parent, option, index):
-        """
-        Important, otherwise an editor is created if the user clicks in this cell.
-        """
-        return None
+    def flags(self, index):
+        fl = QtSql.QSqlTableModel.flags(self, index)
+        if index.column() == COLUMNS_MAIN.index("V"):
+            fl |= QtCore.Qt.ItemIsUserCheckable
+        return fl
 
-    def paint(self, painter, option, index):
-        """
-        Paint a checkbox without the label.
-        """
-        self.drawCheck(painter, option, option.rect,
-                       QtCore.Qt.Unchecked if int(index.data()) == 0 else QtCore.Qt.Checked)
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
+                                                 QtCore.Qt.ItemIsUserCheckable !=
+                                                 QtCore.Qt.NoItemFlags):
+            if index.row() not in self.checkeable_data.keys():
+                self.setData(index, QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
+            return self.checkeable_data[index.row()]
+        else:
+            return QtSql.QSqlTableModel.data(self, index, role)
 
-    def editorEvent(self, event, model, option, index):
-        '''
-        Change the data in the model and the state of the checkbox
-        if the user presses the left mousebutton and this cell is editable. Otherwise do nothing.
-        '''
-        if not int(index.flags() & QtCore.Qt.ItemIsEditable) > 0:
-            return False
-
-        if event.type() == QtCore.QEvent.MouseButtonRelease and event.button() == QtCore.Qt.LeftButton:
-            # Change the checkbox-state
-            self.setModelData(None, model, index)
+    def setData(self, index, value, role=QtCore.Qt.EditRole):
+        if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
+                                                 QtCore.Qt.ItemIsUserCheckable !=
+                                                 QtCore.Qt.NoItemFlags):
+            self.checkeable_data[index.row()] = value
+            self.dataChanged.emit(index, index, (role,))
             return True
-
-        return False
-
-    def setModelData(self, editor, model, index):
-        '''
-        The user wanted to change the old state in the opposite.
-        '''
-        model.setData(index, 1 if int(index.data()) == 0 else 0, QtCore.Qt.EditRole)
+        return QtSql.QSqlTableModel.setData(self, index, value, role)

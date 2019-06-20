@@ -26,8 +26,6 @@ class My_Sql():
             with open("files/sql/lastPath.txt", 'w') as f:
                 f.write(path)
 
-
-
             DB = QtSql.QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
             # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
             DB.setDatabaseName(path)  # Путь к базе данных
@@ -90,3 +88,9 @@ class My_Sql():
         with open(path) as f:
             reader = csv.DictReader(f, delimiter=";")
             return [r for r in reader]
+
+    @staticmethod
+    def replace_val_in_col(db):
+        sql = f"UPDATE mytable SET chk = ''"
+        db.exec(sql)
+        db.commit()
