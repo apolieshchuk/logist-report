@@ -120,13 +120,21 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # включаем сортировку
         self.table_view.sortByColumn(COLUMNS_MAIN.index("Назва"), QtCore.Qt.AscendingOrder)
 
-
         # расширяем строки по содержимому
         self.table_view.resizeRowsToContents()
 
-
     def table_clicked(self, index_in_view):
-        print(self.table_model.checkeable_data)
+        if index_in_view.column() == COLUMNS_MAIN.index("V"):
+            print(self.table_model.checkeable_data)
+        # if index_in_view.column() == COLUMNS_MAIN.index("V"):
+        #     print(self.table_model.checkeable_data)
+        #     # берем текущую VIEW модель (на случай фильтра в том числе)
+        #     model = self.table_view.model()
+        #     # берем нужную клетку с уникальным полем "id"
+        #     cell = model.index(index_in_view.row(), 0)
+        #     # считываем уникальный ID
+        #     id = cell.data()
+        #     print(id)
         # ПРОРАБОТАТЬ ЕСЛИ КОЛОНКА УДАЛИТСЯ!!
         # При клике на флажок добавляет рядок в "отмеченные"
         # if index_in_view.column() == COLUMNS_MAIN.index("V"):  # если кликают на колонку checkbox
@@ -332,10 +340,9 @@ class MySqlTableModel(QtSql.QSqlTableModel):
         self.checkeable_data = {}
 
     def flags(self, index):
-        fl = QtSql.QSqlTableModel.flags(self, index)
         if index.column() == COLUMNS_MAIN.index("V"):
-            fl |= QtCore.Qt.ItemIsUserCheckable
-        return fl
+            return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
+        return QtSql.QSqlTableModel.flags(self, index)
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
