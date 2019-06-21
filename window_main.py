@@ -15,37 +15,34 @@ from files.ui import design
 debug = True
 DB = None
 
-
 class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
     def __init__(self):
+        global DB
+        DB = My_Sql().connect_db(r"\\10.12.1.240\logistics\auto.db")
+        # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
+        # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
 
-            global DB
-            DB = My_Sql().connect_db()
+        # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
+        # My_Sql.data_format_in_db
 
-            # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
-            # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
+        # Это здесь нужно для доступа к переменным, методам
+        # и т.д. в файле design.py
+        super().__init__()
+        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
 
-            # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
-            # My_Sql.data_format_in_db
+        self.create_table_model()  # Функция которая вносит базу данных в QStandartItemModel
 
-            # Это здесь нужно для доступа к переменным, методам
-            # и т.д. в файле design.py
-            super().__init__()
-            self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+        self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
 
-            self.create_table_model()  # Функция которая вносит базу данных в QStandartItemModel
-            self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
+        self.filter_box = FilterBoxes(self.filter_view, self.table_view)  # создаем фильтр-боксы
+        self.create_deselect()
+        self.clear_check_and_filters()  # Очищаем все флажки и фильтры базы при запуске
+        self.copy_checked_but.clicked.connect(self.copy_in_bufer)  # слушаем нажатие кнопки "КОПИРОВАТЬ"
+        self.add_row_but.clicked.connect(self.add_auto)  # слушаем нажатие кнопки "ДОБАВИТЬ АВТО"
+        self.go_but.clicked.connect(self.go_auto)  # слушаем нажатие кнопки "Отправить на маршрут"
+        self.report_but.clicked.connect(self.do_report)
 
-            self.filter_box = FilterBoxes(self.filter_view, self.table_view)  # создаем фильтр-боксы
-            self.create_deselect()
-
-            self.clear_check_and_filters()  # Очищаем все флажки и фильтры базы при запуске
-            self.copy_checked_but.clicked.connect(self.copy_in_bufer)  # слушаем нажатие кнопки "КОПИРОВАТЬ"
-            self.add_row_but.clicked.connect(self.add_auto)  # слушаем нажатие кнопки "ДОБАВИТЬ АВТО"
-            self.go_but.clicked.connect(self.go_auto)  # слушаем нажатие кнопки "Отправить на маршрут"
-            self.report_but.clicked.connect(self.do_report)
-            # self.db.close()
 
     def create_deselect(self):
         # кнопка деселект
@@ -61,13 +58,12 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # сортируем базу данных по алфавиту
         # TODO сортировка украинских букв
 
+
         # создаем модель таблицы
-        self.table_model = MySqlTableModel(None, DB)
+        self.table_model = MySqlTableModel(None)
         self.table_model.setTable("mytable")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()
-
-        print(self.table_model.checkeable_data)
 
         # создаем горизонтальную шапку
         for col in range(self.table_model.columnCount()):
@@ -172,7 +168,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
     def copy_in_bufer(self,*info):
         buf = ""
         c = 1
-
         for id in self.get_checked_ids():
             # формируем sql запрос
             sql = DB.exec(f"SELECT * FROM mytable WHERE id = {id}")
@@ -195,8 +190,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # При нажатие ОК на диалоге вытаскивает введенные значения и вставляет в таблицу
         row = []
         if self.dialog.exec_():
-            DB.exec(f"""INSERT INTO mytable(chk,name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
-                              '0',
+            # DB.open()
+            DB.exec(f"""INSERT INTO mytable(name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
                               '{self.dialog.line_carrier.text()}',
                               '{self.dialog.line_kod.text()}',
                               '{self.dialog.line_mark.text()}',
@@ -209,7 +204,11 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                               '{self.dialog.line_note.text()}'
                           )""")
             DB.commit()
-            self.table_model.select()
+            !!! #TODO Клоз енд опен db
+            # self.table_model.select()
+            # self.table_view.setModel(self.table_model)
+            # DB.close()
+
 
     def go_auto(self):
         # TODO Укоротить функцию
@@ -258,6 +257,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                     # дополнительно копируем в буфер инфо по загрузке
                     self.copy_in_bufer(date,route) # Дата и маршрут
 
+                    DB.open()
                     # вставляем в БД строку
                     for el in go_report:
                         # format go_report:
@@ -278,6 +278,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                                           '{el[10]}'
                                       )""")
                         DB.commit()
+                    DB.close()
                     self.clear_check_and_filters()
 
     def do_report(self):

@@ -1,1 +1,1 @@
-files/auto.db
+\\10.12.1.240\logistics\auto.db

@@ -7,32 +7,29 @@ from dial_dbpath import DbPathWindow
 
 class My_Sql():
 
-    def connect_db(self):
-        # Открываем базу данных
-        pathWindow = DbPathWindow()
-        DB = None
-        # достаем последний путь к файлу
-        try:
-            with open("files/sql/lastPath.txt") as f:
-                path = f.readline()
-            pathWindow.line_edit.setText(path)
-        except:
-            pass
-        if pathWindow.exec_():
-            path = pathWindow.line_edit.text()
-            if not os.path.isfile(path): return None # Проверяем наличие файла
-
-            # Сохраняем путь к файлу
-            with open("files/sql/lastPath.txt", 'w') as f:
-                f.write(path)
-
-            DB = QtSql.QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
-            # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
-            DB.setDatabaseName(path)  # Путь к базе данных
-            DB.open()  # Открываем базу данных
-
+    def connect_db(self,path):
+        DB = QtSql.QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
+        # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
+        DB.setDatabaseName(path)  # Путь к базе данных
+        # DB.open()  # Открываем базу данных
         return DB
-
+        # # Открываем базу данных
+        # pathWindow = DbPathWindow()
+        # DB = None
+        # # достаем последний путь к файлу
+        # try:
+        #     with open("files/sql/lastPath.txt") as f:
+        #         path = f.readline()
+        #     pathWindow.line_edit.setText(path)
+        # except:
+        #     pass
+        # if pathWindow.exec_():
+        #     path = pathWindow.line_edit.text()
+        #     if not os.path.isfile(path): return None # Проверяем наличие файла
+        #
+        #     # Сохраняем путь к файлу
+        #     with open("files/sql/lastPath.txt", 'w') as f:
+        #         f.write(path)
     @staticmethod
     def add_report_from_csv(csv,db):
         report = My_Sql.csv_to_list(csv)

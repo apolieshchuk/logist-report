@@ -6,6 +6,7 @@ from window_main import LogistReportWindow
 from PyQt5 import QtWidgets, QtSql
 import sys  # sys нужен для передачи argv в QApplication
 
+
 def main():
 
 
