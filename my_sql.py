@@ -4,14 +4,14 @@ import os
 from PyQt5 import QtSql
 from dial_dbpath import DbPathWindow
 
-
+# TODO Изменить названия окон!
 class My_Sql():
 
     def connect_db(self,path):
         DB = QtSql.QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
         # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
         DB.setDatabaseName(path)  # Путь к базе данных
-        # DB.open()  # Открываем базу данных
+        DB.open()  # Открываем базу данных
         return DB
         # # Открываем базу данных
         # pathWindow = DbPathWindow()

@@ -54,7 +54,9 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # создаем модель таблицы
         # self.table_model = QtSql.QSqlQueryModel()
         # self.table_model.setQuery(sql_model)
-        self.table_model = QtSql.QSqlTableModel(None)
+        # TODO Reload DB не обновляется отчет
+
+        self.table_model = QtSql.QSqlTableModel(None,DB)
         self.table_model.setTable("reptable")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()

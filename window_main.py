@@ -19,7 +19,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
     def __init__(self):
         global DB
-        DB = My_Sql().connect_db(r"\\10.12.1.240\logistics\auto.db")
+        # DB = My_Sql().connect_db(r"\\10.12.1.240\logistics\auto.db")
+        #TODO окно коннекта
+        DB = My_Sql().connect_db("files/auto.db")
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
         # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
 
@@ -58,9 +60,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # сортируем базу данных по алфавиту
         # TODO сортировка украинских букв
 
-
+        self.table_model = MySqlTableModel(None,DB)
         # создаем модель таблицы
-        self.table_model = MySqlTableModel(None)
+        # DB.close()
         self.table_model.setTable("mytable")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()
@@ -188,10 +190,10 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.dialog = AddAutoWindow()
         self.dialog.show()
         # При нажатие ОК на диалоге вытаскивает введенные значения и вставляет в таблицу
-        row = []
+        # Обязательно заполнение поля CHK!
         if self.dialog.exec_():
-            # DB.open()
-            DB.exec(f"""INSERT INTO mytable(name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
+            DB.exec(f"""INSERT INTO mytable(chk,name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
+                              '',
                               '{self.dialog.line_carrier.text()}',
                               '{self.dialog.line_kod.text()}',
                               '{self.dialog.line_mark.text()}',
@@ -204,10 +206,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                               '{self.dialog.line_note.text()}'
                           )""")
             DB.commit()
-            !!! #TODO Клоз енд опен db
-            # self.table_model.select()
+
+            self.table_model.select()
             # self.table_view.setModel(self.table_model)
-            # DB.close()
 
 
     def go_auto(self):
@@ -257,7 +258,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                     # дополнительно копируем в буфер инфо по загрузке
                     self.copy_in_bufer(date,route) # Дата и маршрут
 
-                    DB.open()
                     # вставляем в БД строку
                     for el in go_report:
                         # format go_report:
@@ -278,7 +278,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                                           '{el[10]}'
                                       )""")
                         DB.commit()
-                    DB.close()
                     self.clear_check_and_filters()
 
     def do_report(self):
