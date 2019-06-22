@@ -13,6 +13,9 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
 
+        # меняем титл окна
+        self.setWindowTitle("Отчет")
+
 
         # Создаем таблицу
         self.create_table_model()
@@ -48,12 +51,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         from window_main import DB
 
         # фильтруем модель за период
-        # sql_model = DB.exec(f"SELECT * FROM reptable WHERE route_date BETWEEN"
-        #                     f" '{self.date1}' AND '{self.date2}'")
 
-        # создаем модель таблицы
-        # self.table_model = QtSql.QSqlQueryModel()
-        # self.table_model.setQuery(sql_model)
         # TODO Reload DB не обновляется отчет
 
         self.table_model = QtSql.QSqlTableModel(None,DB)

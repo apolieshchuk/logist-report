@@ -28,10 +28,15 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
         # My_Sql.data_format_in_db
 
+
+
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+
+        # меняем титл окна
+        self.setWindowTitle("База авто")
 
         self.create_table_model()  # Функция которая вносит базу данных в QStandartItemModel
 

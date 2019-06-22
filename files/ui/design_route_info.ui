@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>609</width>
-    <height>280</height>
+    <height>427</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,6 +35,9 @@
      </item>
      <item>
       <widget class="QComboBox" name="manager_box"/>
+     </item>
+     <item>
+      <widget class="QComboBox" name="crop_box"/>
      </item>
     </layout>
    </item>
