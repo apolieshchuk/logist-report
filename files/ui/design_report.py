@@ -18,6 +18,9 @@ class Ui_ReportWindow(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.excel_but = QtWidgets.QPushButton(self.centralwidget)
+        self.excel_but.setObjectName("excel_but")
+        self.horizontalLayout.addWidget(self.excel_but)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
@@ -56,6 +59,7 @@ class Ui_ReportWindow(object):
     def retranslateUi(self, ReportWindow):
         _translate = QtCore.QCoreApplication.translate
         ReportWindow.setWindowTitle(_translate("ReportWindow", "MainWindow"))
+        self.excel_but.setText(_translate("ReportWindow", "В excel"))
         self.label_2.setText(_translate("ReportWindow", "От"))
         self.label.setText(_translate("ReportWindow", "До"))
 

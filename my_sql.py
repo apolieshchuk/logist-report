@@ -4,7 +4,6 @@ import os
 from PyQt5 import QtSql
 from dial_dbpath import DbPathWindow
 
-# TODO Изменить названия окон!
 class My_Sql():
 
     def connect_db(self,path):
@@ -18,7 +17,7 @@ class My_Sql():
         # DB = None
         # # достаем последний путь к файлу
         # try:
-        #     with open("files/sql/lastPath.txt") as f:
+        #     with open("files/sql/path.txt") as f:
         #         path = f.readline()
         #     pathWindow.line_edit.setText(path)
         # except:
@@ -28,7 +27,7 @@ class My_Sql():
         #     if not os.path.isfile(path): return None # Проверяем наличие файла
         #
         #     # Сохраняем путь к файлу
-        #     with open("files/sql/lastPath.txt", 'w') as f:
+        #     with open("files/sql/path.txt", 'w') as f:
         #         f.write(path)
     @staticmethod
     def add_report_from_csv(csv,db):

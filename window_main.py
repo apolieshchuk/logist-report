@@ -20,15 +20,13 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
     def __init__(self):
         global DB
         # DB = My_Sql().connect_db(r"\\10.12.1.240\logistics\auto.db")
-        #TODO окно коннекта
-        DB = My_Sql().connect_db("files/auto.db")
+        DB = My_Sql().connect_db(self.path_to_bd())
+
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
         # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
 
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
         # My_Sql.data_format_in_db
-
-
 
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
@@ -37,21 +35,15 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
         # меняем титл окна
         self.setWindowTitle("База авто")
-
         self.create_table_model()  # Функция которая вносит базу данных в QStandartItemModel
-
         self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
-
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)  # создаем фильтр-боксы
-        self.create_deselect()
-        self.clear_check_and_filters()  # Очищаем все флажки и фильтры базы при запуске
-        self.copy_checked_but.clicked.connect(self.copy_in_bufer)  # слушаем нажатие кнопки "КОПИРОВАТЬ"
-        self.add_row_but.clicked.connect(self.add_auto)  # слушаем нажатие кнопки "ДОБАВИТЬ АВТО"
-        self.go_but.clicked.connect(self.go_auto)  # слушаем нажатие кнопки "Отправить на маршрут"
-        self.report_but.clicked.connect(self.do_report)
+        self.create_deselect_but()
+        self.buttons_listeners()
 
 
-    def create_deselect(self):
+
+    def create_deselect_but(self):
         # кнопка деселект
         deselect_but = QtWidgets.QPushButton("DEL")
         deselect_but.setFixedSize(35, 20)
@@ -215,7 +207,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             self.table_model.select()
             # self.table_view.setModel(self.table_model)
 
-
     def go_auto(self):
         # TODO Укоротить функцию
 
@@ -289,6 +280,26 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.report_window = ReportWindow()
         self.report_window.show()
 
+    def path_to_bd(self):
+        try:
+            with open("files/sql/path.txt") as f:
+                return f.readline().rstrip()
+        except:
+            print("Error! Don't find path-file to BD")
+        return None
+
+    def set_path_to_bd(self):
+        pathWindow = DbPathWindow()
+        pathWindow.line_edit.setText(self.path_to_bd())
+        if pathWindow.exec_():
+            path = pathWindow.line_edit.text()
+            if not os.path.isfile(path): return None  # Проверяем наличие файла
+
+            # Сохраняем путь к файлу
+            with open("files/sql/path.txt", 'w') as f:
+                f.write(path)
+
+
     # ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ
     def get_checked_ids(self):
         s = set()
@@ -321,6 +332,14 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         elif name == "QComboBox":
             return obj.currentText()
         return 0
+
+    def buttons_listeners(self):
+        self.copy_checked_but.clicked.connect(self.copy_in_bufer)  # слушаем нажатие кнопки "КОПИРОВАТЬ"
+        self.add_row_but.clicked.connect(self.add_auto)  # слушаем нажатие кнопки "ДОБАВИТЬ АВТО"
+        self.go_but.clicked.connect(self.go_auto)  # слушаем нажатие кнопки "Отправить на маршрут"
+        self.path_but.clicked.connect(self.set_path_to_bd)  # слушаем нажатие кнопки "Найстройки"
+        self.report_but.clicked.connect(self.do_report)  # слушаем нажатие кнопки "отчет"
+
 
 # class for fix out events
 class MyLineEdit(QtWidgets.QLineEdit):

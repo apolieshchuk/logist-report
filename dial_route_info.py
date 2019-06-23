@@ -16,8 +16,6 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         self.route = route
         self.create_table_model()
         self.create_table_view()
-        #TODO расширить вширь "УТС" коротко
-        #TODO расширить вдлину
 
 
         self.date_edit.setDate(QtCore.QDate.currentDate())

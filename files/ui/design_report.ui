@@ -18,6 +18,13 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
+       <widget class="QPushButton" name="excel_but">
+        <property name="text">
+         <string>В excel</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
