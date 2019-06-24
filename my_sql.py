@@ -7,12 +7,17 @@ class My_Sql():
 
     def connect_db(self,path):
         DB = QSqlDatabase().addDatabase('QMYSQL')  # Чем читаем Sql. QSQLITE- для sqlite
-        # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
+        # DB.setDatabaseName(path)  # Путь к базе данных
         DB.setHostName("localhost")
+        DB.setPort(3306)
         DB.setDatabaseName("auto")
-        DB.setUserName("aipx")  # Путь к базе данных
+        DB.setUserName("root")  # Путь к базе данных
         DB.setPassword("aipx123")
-        DB.open()  # Открываем базу данных
+        if DB.open():
+            print('OK!')# Открываем базу данных
+        else:
+            print("NOT OK!")
+            print(DB.lastError().text())
         return DB
 
     @staticmethod
