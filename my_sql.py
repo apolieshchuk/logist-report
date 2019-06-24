@@ -2,7 +2,6 @@ import csv
 import os
 
 from PyQt5.QtSql import *
-from dial_dbpath import DbPathWindow
 
 class My_Sql():
 
