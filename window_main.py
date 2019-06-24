@@ -20,7 +20,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
     def __init__(self):
         global DB
         # DB = My_Sql().connect_db(r"\\10.12.1.240\logistics\auto.db")
-        DB = My_Sql().connect_db(self.path_to_bd())
+        DB = My_Sql().connect_db("files/sql/auto.db")
+        # DB = My_Sql().connect_db(self.path_to_bd())
 
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
         # My_Sql.add_report_from_csv("files/sql/report.csv", DB)

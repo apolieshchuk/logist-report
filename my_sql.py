@@ -1,34 +1,21 @@
 import csv
 import os
 
-from PyQt5 import QtSql
+from PyQt5.QtSql import *
 from dial_dbpath import DbPathWindow
 
 class My_Sql():
 
     def connect_db(self,path):
-        DB = QtSql.QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
+        DB = QSqlDatabase().addDatabase('QMYSQL')  # Чем читаем Sql. QSQLITE- для sqlite
         # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
-        DB.setDatabaseName(path)  # Путь к базе данных
+        DB.setHostName("localhost")
+        DB.setDatabaseName("auto")
+        DB.setUserName("aipx")  # Путь к базе данных
+        DB.setPassword("aipx123")
         DB.open()  # Открываем базу данных
         return DB
-        # # Открываем базу данных
-        # pathWindow = DbPathWindow()
-        # DB = None
-        # # достаем последний путь к файлу
-        # try:
-        #     with open("files/sql/path.txt") as f:
-        #         path = f.readline()
-        #     pathWindow.line_edit.setText(path)
-        # except:
-        #     pass
-        # if pathWindow.exec_():
-        #     path = pathWindow.line_edit.text()
-        #     if not os.path.isfile(path): return None # Проверяем наличие файла
-        #
-        #     # Сохраняем путь к файлу
-        #     with open("files/sql/path.txt", 'w') as f:
-        #         f.write(path)
+
     @staticmethod
     def add_report_from_csv(csv,db):
         report = My_Sql.csv_to_list(csv)
