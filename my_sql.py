@@ -17,15 +17,15 @@ class My_Sql():
         DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
         DB.setDatabaseName(path)  # Путь к базе данных
         # DB = QSqlDatabase().addDatabase('QODBC')
-        # DB.setDatabaseName("Driver={MySQL ODBC 8.0 ANSI Driver};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
+        # DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
         # print(QSqlDatabase().drivers())
         # DB.setDatabaseName("DRIVER={SQL Server};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
         # DB.setHostName("localhost")
         # DB.setDatabaseName("auto")
         # DB.setUserName("root")  # Путь к базе данных
         # DB.setPassword("aipx123")
-        DB.open()  # Открываем базу данных
-        # print(DB.lastError().text())
+        if DB.open():  # Открываем базу данных
+            print("BD OPENING!!")
         return DB
 
     @staticmethod
