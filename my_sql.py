@@ -14,10 +14,10 @@ class My_Sql():
         # )
 
         # print(mydb.get_row())
-        DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
-        DB.setDatabaseName(path)  # Путь к базе данных
-        # DB = QSqlDatabase().addDatabase('QODBC')
-        # DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
+        # DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
+        # DB.setDatabaseName(path)  # Путь к базе данных
+        DB = QSqlDatabase().addDatabase('QODBC','odbc connection')
+        DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
         # print(QSqlDatabase().drivers())
         # DB.setDatabaseName("DRIVER={SQL Server};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
         # DB.setHostName("localhost")
@@ -83,6 +83,21 @@ class My_Sql():
         with open(path) as f:
             reader = csv.DictReader(f, delimiter=";")
             return [r for r in reader]
+
+    @staticmethod
+    def sqlite_to_mysql(db_mysql,path_to_sqlite):
+        db_sqlite = QSqlDatabase().addDatabase('QSQLITE', 'sqlite connection')  # Чем читаем Sql. QSQLITE- для sqlite
+        db_sqlite.setDatabaseName(path_to_sqlite)  # Путь к базе данных
+
+        # DEBUG for opening
+        if (db_sqlite.open()):
+            print('SQLITE OPENED')
+        if(db_mysql.open()):
+            print('MYSQL OPENED')
+
+        db_sqlite
+
+
 
     @staticmethod
     def replace_val_in_col(db):
