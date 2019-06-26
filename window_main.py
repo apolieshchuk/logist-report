@@ -24,7 +24,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # DB = My_Sql().connect_db(self.path_to_bd())
 
         # ПЕРЕНОС С SQLITE В MYSQL
-        My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
+        # My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
 
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
         # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
@@ -64,7 +64,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_model = MySqlTableModel(None,DB)
         # создаем модель таблицы
         # DB.close()
-        self.table_model.setTable("test")
+        self.table_model.setTable("auto")
         self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
         self.table_model.select()
 

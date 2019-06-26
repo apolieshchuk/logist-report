@@ -17,7 +17,7 @@ class My_Sql():
         # DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
         # DB.setDatabaseName(path)  # Путь к базе данных
         DB = QSqlDatabase().addDatabase('QODBC','odbc connection')
-        DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
+        DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7")
         # print(QSqlDatabase().drivers())
         # DB.setDatabaseName("DRIVER={SQL Server};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
         # DB.setHostName("localhost")
@@ -95,8 +95,43 @@ class My_Sql():
         if(db_mysql.open()):
             print('MYSQL OPENED')
 
-        db_sqlite
 
+        # insert MyTable
+        # sql = db_sqlite.exec_("SELECT * FROM mytable")
+        # # print(sql.size())
+        # while sql.next():
+        #     row = []
+        #     for col in range(12):
+        #         row.append(sql.value(col))
+        #     sql2 = f"""INSERT INTO auto(chk, name, code, mark, auto_num,
+        #                                 trail_num, dr_surn, dr_name, dr_fath, tel, notes)
+        #               VALUES ('{row[1]}','{row[2]}','{row[3]}','{row[4]}','{row[5]}','{row[6]}','{row[7]}',
+        #               '{row[8]}','{row[9]}','{row[10]}','{row[11]}')"""
+        #     db_mysql.exec_(sql2)
+
+        # insert Reptable
+        # sql = db_sqlite.exec_("SELECT * FROM reptable")
+        # while sql.next():
+        #     row = []
+        #     for col in [0,1,8,10,2,3,9,4,11,5,6,7]:
+        #         row.append(sql.value(col))
+        #     row.append("")
+        #     print(row)
+        #     sql2 = f"INSERT INTO reptable(route_date, manager, crop, route,carrier, auto_num, dr_surn, tel, f2, f1, tr, notes)" \
+        #            f" VALUES ('{row[1]}','{row[2]}','{row[3]}','{row[4]}','{row[5]}','{row[6]}','{row[7]}','{row[8]}','{row[9]}'," \
+        #            f"'{row[10]}','{row[11]}','{row[12]}')"
+        #     db_mysql.exec_(sql2)
+
+        # insert routes
+        # sql = db_sqlite.exec_("SELECT * FROM routes")
+        # while sql.next():
+        #     row = []
+        #     for col in [0,1]:
+        #         row.append(sql.value(col))
+        #     row.append("")
+        #     print(row)
+        #     sql2 = f"INSERT INTO routes(route) VALUES ('{row[1]}')"
+        #     db_mysql.exec_(sql2)
 
 
     @staticmethod
