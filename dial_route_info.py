@@ -62,7 +62,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
             row = []
             for el in ROUTE_INFO_PATTERN:
                 item = QtGui.QStandardItem(sql.value(el))
-                item.setEditable(False)
+                # item.setEditable(False) # неизменяемость елементов в окне
                 row.append(item)
             self.table_model.appendRow(row)
 
@@ -131,7 +131,10 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                 dict[val] = 1
         sorted_dict = sorted(dict.items(), key=operator.itemgetter(1), reverse= True)
         if debug: print (sorted_dict)
-        return sorted_dict[0][0]
+        if len(sorted_dict) > 0:
+            return sorted_dict[0][0]
+        return ""
+
 
 class MyLineEdit(QtWidgets.QLineEdit):
 
