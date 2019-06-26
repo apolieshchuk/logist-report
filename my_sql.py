@@ -1,18 +1,31 @@
 import csv
-import os
 
 from PyQt5.QtSql import *
+
+import mysql.connector
 
 class My_Sql():
 
     def connect_db(self,path):
-        DB = QSqlDatabase().addDatabase('QMYSQL')  # Чем читаем Sql. QSQLITE- для sqlite
-        # DB.setDatabaseName("files/auto.db")  # Путь к базе данных
-        DB.setHostName("localhost")
-        DB.setDatabaseName("auto")
-        DB.setUserName("aipx")  # Путь к базе данных
-        DB.setPassword("aipx123")
+        # mydb = mysql.connector.connect(
+        #     host="localhost",
+        #     user="root",
+        #     passwd="aipx123"
+        # )
+
+        # print(mydb.get_row())
+        DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
+        DB.setDatabaseName(path)  # Путь к базе данных
+        # DB = QSqlDatabase().addDatabase('QODBC')
+        # DB.setDatabaseName("Driver={MySQL ODBC 8.0 ANSI Driver};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
+        # print(QSqlDatabase().drivers())
+        # DB.setDatabaseName("DRIVER={SQL Server};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
+        # DB.setHostName("localhost")
+        # DB.setDatabaseName("auto")
+        # DB.setUserName("root")  # Путь к базе данных
+        # DB.setPassword("aipx123")
         DB.open()  # Открываем базу данных
+        # print(DB.lastError().text())
         return DB
 
     @staticmethod
