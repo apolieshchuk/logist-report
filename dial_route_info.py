@@ -5,7 +5,7 @@ from files.ui import design_route_info
 from PyQt5 import QtWidgets, QtGui, QtCore, QtSql
 from static import TITLE_FONT, ROUTE_INFO_PATTERN, COLUMNS_ROUTE_INFO, MANAGERS, CROPS
 
-debug = True
+DEBUG = True
 
 class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
 
@@ -54,7 +54,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         for id in self.id_set:
             # формируем sql запрос
 
-            sql = DB.exec(f"SELECT * FROM mytable WHERE id = {id}")
+            sql = DB.exec(f"SELECT * FROM auto WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
             sql.next()
 
@@ -86,16 +86,16 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         text_inputs = []
         text_inputs.append(COLUMNS_ROUTE_INFO.index("ф1"))
         text_inputs.append(COLUMNS_ROUTE_INFO.index("ф2"))
-        print()
+        # print()
         for col in text_inputs:  # bc checkbox "CHECKBOX_INDEX" col
             for row in range(self.table_model.rowCount()):
                 inp_text = MyLineEdit(self, row, col)
                 inp_text.setFixedWidth(self.table_view.columnWidth(col))
                 inp_text.setFixedHeight(self.table_view.rowHeight(row))
                 if col == COLUMNS_ROUTE_INFO.index("ф1"):
-                    inp_text.setText(str(self.most_used_on_route('f1')))
+                    inp_text.setText(str(self.most_used_on_route('f1',10)))
                 elif col == COLUMNS_ROUTE_INFO.index("ф2"):
-                    inp_text.setText(str(self.most_used_on_route('f2')))
+                    inp_text.setText(str(self.most_used_on_route('f2',10)))
                 # добавляем его в таблицу
                 self.table_view.setIndexWidget(self.table_model.index(row, col), inp_text)
 
@@ -106,7 +106,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
             lst_widg.addItem("НЕТ")
             lst_widg.addItem("ДА")
             # устанавливаем значение трансформации на маршруте
-            tr = self.most_used_on_route("tr")
+            tr = self.most_used_on_route("tr",10)
             ind = lst_widg.findText(tr)
             if ind != -1:
                 lst_widg.setCurrentIndex(ind)
@@ -118,10 +118,11 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
-    def most_used_on_route(self, item, limit = -1 ):
+    def most_used_on_route(self, item, limit = 18446744073709551615):
         # limit - количество ПОСЛЕДНИХ по ID записей
         from window_main import DB
-        sql = DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}' ORDER BY id DESC LIMIT {limit} ")
+        sql = DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
+                      f" ORDER BY id DESC LIMIT {limit} ")
         dict = {}
         while sql.next():
             val = sql.value(item)
@@ -130,7 +131,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
             else:
                 dict[val] = 1
         sorted_dict = sorted(dict.items(), key=operator.itemgetter(1), reverse= True)
-        if debug: print (sorted_dict)
+        if DEBUG: print (sorted_dict)
         if len(sorted_dict) > 0:
             return sorted_dict[0][0]
         return ""

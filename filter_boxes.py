@@ -1,6 +1,6 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 
-debug = True
+DEBUG = True
 
 
 class FilterBoxes(QtWidgets.QMainWindow):
@@ -10,15 +10,27 @@ class FilterBoxes(QtWidgets.QMainWindow):
         self.filter_model = QtGui.QStandardItemModel()  # модель фильтра
         self.filter_view = filter_view  # вид фильтра
         self.table_view = table_view  # tableView по которому делаем фильтр
-        self.table_model = table_view.model()  # таблица по которой делаем фильтр
+        self.origin_table_model = table_view.model()  # таблица по которой делаем фильтр
         self.create_filter_model()
         self.create_filter_view()
-
+        self.sql_table_header = self.get_sql_table_header()
+        self.last_filter = ""
         # TODO фильтры выбора
+
+    def get_sql_table_header(self):
+        from window_main import DB
+        # Берем шапку с используемой таблицы
+        table = self.origin_table_model.tableName()
+        sql = DB.exec_(f"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}'")
+        header = []
+        while sql.next():
+            header.append(sql.value(3))
+        if DEBUG: print("Header in filtered table -", header)
+        return header
 
     def create_filter_model(self):
         # создаем рядок со сзначений StandartItemModel
-        self.filter_model.appendRow([QtGui.QStandardItem(0) for _ in range(self.table_model.columnCount())])
+        self.filter_model.appendRow([QtGui.QStandardItem(0) for _ in range(self.origin_table_model.columnCount())])
 
     def create_filter_view(self):
         # вставляем модель в tableview
@@ -35,6 +47,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # стираем вертикальную шапку
         self.filter_model.setHeaderData(0, QtCore.Qt.Vertical, " ")
 
+        # TODO очистка полей инпута при переходе на новое поле фильтра
         # поля инпута(фильтры)
         for col in range(self.filter_model.columnCount()):  # bc checkbox "CHECKBOX_INDEX" col
             filter_text = MyLineEdit(self.table_view.window(), 0, col)
@@ -58,28 +71,34 @@ class FilterBoxes(QtWidgets.QMainWindow):
         taker_view.verticalHeader().setMaximumWidth(tabl_head_width)
 
     def filter_text_edited(self):
-        if debug: print("Text change event (filter_text_edited)")
-
-        # делаем реджекс выражение
+        if DEBUG: print("Text change event (filter_text_edited)")
         text = self.sender().text()
-        # print(text)
+
+        # если текст предыдущего фильтра есть в текущем,
+        # не нужно перебирать всю таблицу снова
+        model_for_filter = self.origin_table_model
+        if self.last_filter in text:
+            # прокручиваем к низу все данные в модели
+            while model_for_filter.canFetchMore():
+                model_for_filter.fetchMore()
+            model_for_filter = self.table_view.model()
+        self.last_filter = text
+
+        # # фильтруем модель СПОСОБ №1
+        # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
+        # self.table_view.resizeRowsToContents()  # расширяем строки по содержимому
+
+        # фильтруем модель СПОСОБ №2
+        # делаем реджекс выражение
         regex = ""
         for c in text:
             regex += f"[{c.lower()}{c.upper()}]"
-        # строи модель прокси фильтра
+        # строим модель прокси фильтра
         proxy_model = QtCore.QSortFilterProxyModel()
         proxy_model.setFilterRegExp(regex)
         proxy_model.setFilterKeyColumn(self.sender().col)
-
-        # прокручиваем к низу все данные в модели
-        while self.table_model.canFetchMore():
-            self.table_model.fetchMore()
-
-        proxy_model.setSourceModel(self.table_model)  # что фильтруем?
+        proxy_model.setSourceModel(model_for_filter)  # что фильтруем?
         self.table_view.setModel(proxy_model)  # Вот вам отфильтрованное
-        self.table_view.resizeRowsToContents()  # расширяем строки по содержимому
-
-
 
 
 class MyLineEdit(QtWidgets.QLineEdit):
@@ -91,7 +110,7 @@ class MyLineEdit(QtWidgets.QLineEdit):
         self.col = col
 
     def focusInEvent(self, event):
-        if debug: print("Focus in ivent (MyLineEdit Class)")
+        if DEBUG: print("Focus in ivent (MyLineEdit Class)")
         # проверяем, если текст в фильтре - это название фильтра - стираем
         if self.text() == self.window.table_model.headerData(self.col, QtCore.Qt.Horizontal):
             self.setText("")
@@ -103,7 +122,7 @@ class MyLineEdit(QtWidgets.QLineEdit):
         # название фильтра
         if not self.text():
             # self.setProperty("StopFilter", True)
-            if debug: print(" Focus out event (MyLineEdit Class)")
+            if DEBUG: print(" Focus out event (MyLineEdit Class)")
             self.filter_default_viewset(self.window.table_view)
         super(MyLineEdit, self).focusOutEvent(event)
 

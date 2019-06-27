@@ -6,24 +6,26 @@ import mysql.connector
 
 class My_Sql():
 
-    def connect_db(self,path):
-        # mydb = mysql.connector.connect(
-        #     host="localhost",
-        #     user="root",
-        #     passwd="aipx123"
-        # )
-
-        # print(mydb.get_row())
+    def connect_db(self):
+        #SQLITE
         # DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
         # DB.setDatabaseName(path)  # Путь к базе данных
-        DB = QSqlDatabase().addDatabase('QODBC','odbc connection')
-        DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7")
-        # print(QSqlDatabase().drivers())
-        # DB.setDatabaseName("DRIVER={SQL Server};SERVER = localhost;DATABASE=auto;UID=root;PWD=aipx123")
-        # DB.setHostName("localhost")
+        # DB = QSqlDatabase().addDatabase('QODBC','odbc connection')
+        # DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;"
+        #                    "DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7")
+
+        # MYSQL
+        # DB = QSqlDatabase().addDatabase('QMYSQL','mysql connection')
+        # DB.setHostName("10.12.1.240")
         # DB.setDatabaseName("auto")
-        # DB.setUserName("root")  # Путь к базе данных
-        # DB.setPassword("aipx123")
+        # DB.setUserName("logist")  # Путь к базе данных
+        # DB.setPassword("1cjDaw4RNjhMp7")
+
+        # ODBC
+        DB = QSqlDatabase().addDatabase('QODBC', 'odbc connection')
+        DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;"
+                           "DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7")
+
         if DB.open():  # Открываем базу данных
             print("BD OPENING!!")
         return DB
@@ -33,14 +35,14 @@ class My_Sql():
         report = My_Sql.csv_to_list(csv)
         print(report[1])
         for el in report:
-            db.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,surname,f2,f1,tr) VALUES (
+            db.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,f2,f1,tr) VALUES (
                                                   '{el['route_date']}',
                                                   '{el['manager']}',
                                                   '{el['route']}',
                                                   '{el['crop']}',
                                                   '{el['carrier']}',
                                                   '{el['auto_num']}',
-                                                  '{el['surname']}',
+                                                  '{el['dr_surn']}',
                                                   '{el['f2']}',
                                                   '{el['f1']}',
                                                   '{el['tr']}'
@@ -96,8 +98,8 @@ class My_Sql():
             print('MYSQL OPENED')
 
 
-        # insert MyTable
-        # sql = db_sqlite.exec_("SELECT * FROM mytable")
+        # insert auto
+        # sql = db_sqlite.exec_("SELECT * FROM auto")
         # # print(sql.size())
         # while sql.next():
         #     row = []
@@ -133,9 +135,8 @@ class My_Sql():
         #     sql2 = f"INSERT INTO routes(route) VALUES ('{row[1]}')"
         #     db_mysql.exec_(sql2)
 
-
     @staticmethod
     def replace_val_in_col(db):
-        sql = f"UPDATE mytable SET chk = ''"
+        sql = f"UPDATE auto SET chk = ''"
         db.exec(sql)
         db.commit()

@@ -12,15 +12,14 @@ import os
 
 from files.ui import design
 
-debug = True
+
 DB = None
 
 class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
     def __init__(self):
         global DB
-        # DB = My_Sql().connect_db(r"\\10.12.1.240\logistics\auto.db")
-        DB = My_Sql().connect_db("files/sql/auto.db")
+        DB = My_Sql().connect_db()
         # DB = My_Sql().connect_db(self.path_to_bd())
 
         # ПЕРЕНОС С SQLITE В MYSQL
@@ -36,6 +35,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # и т.д. в файле design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+
+        # отключаем кнопку настроек сервера
+        self.path_but.hide()
 
         # меняем титл окна
         self.setWindowTitle("База авто")
@@ -116,7 +118,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_view.sortByColumn(COLUMNS_MAIN.index("Назва"), QtCore.Qt.AscendingOrder)
 
         # удлиняем строки по содержимому
-        self.table_view.resizeRowsToContents()
+        # self.table_view.resizeRowsToContents()
 
     def table_clicked(self, index_in_view):
         pass
@@ -145,13 +147,13 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         #         self.checked_ids.add(id)
         #     else:
         #         self.checked_ids.remove(id)
-        #     if debug: print("Checked rows", self.checked_ids)
+        #     if DEBUG: print("Checked rows", self.checked_ids)
 
     # КНОПКИ ГЛАВНОГО ОКНА
     def clear_check_and_filters(self):
 
         # Убираем выделение с строк
-        # DB.exec("UPDATE mytable SET chk=0 WHERE chk = 1")
+        # DB.exec("UPDATE auto SET chk=0 WHERE chk = 1")
         # TODO проходит весь словарь, желательно точечно
         for k,v in self.table_model.checkeable_data.items():
             self.table_model.checkeable_data[k] = 0
@@ -165,15 +167,17 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             widg.filter_default_viewset(self.table_view)
 
         # пересоздаем окно и обнуляем список выделения
-        self.table_model.select()
+        # self.table_model.select()
+        # TODO Долго ресайзит роус ту контентс
         self.table_view.setModel(self.table_model)
+        # self.table_view.resizeRowsToContents()
 
     def copy_in_bufer(self,*info):
         buf = ""
         c = 1
         for id in self.get_checked_ids():
             # формируем sql запрос
-            sql = DB.exec(f"SELECT * FROM mytable WHERE id = {id}")
+            sql = DB.exec(f"SELECT * FROM auto WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
             sql.next()
             # формируем колонки которые заданы шаблоном
@@ -193,8 +197,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # При нажатие ОК на диалоге вытаскивает введенные значения и вставляет в таблицу
         # Обязательно заполнение поля CHK!
         if self.dialog.exec_():
-            DB.exec(f"""INSERT INTO mytable(chk,name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
-                              '',
+            DB.exec(f"""INSERT INTO auto(name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
                               '{self.dialog.line_carrier.text()}',
                               '{self.dialog.line_kod.text()}',
                               '{self.dialog.line_mark.text()}',
@@ -221,7 +224,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             self.dial_routes = RoutesWindow()
             if self.dial_routes.exec_(): # если выбран маршрут
                 route = self.dial_routes.choice  # МАРШРУТ
-                if debug: print(route)
+                if DEBUG: print(route)
 
                 # Окно с доп.инфой к маршруту
                 info = []
@@ -242,7 +245,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                             el += [self.text_from_obj(item)]
                         info.append(el)
 
-                    # if debug:
+                    # if DEBUG:
                         # for el in info: print(el)
 
                     # Ячейка добавленния в базу REPTABLE
@@ -253,7 +256,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                     go_report = []
                     for el in info:
                         go_report.append([date] + [manager] + [route] + [crop] + el)  # создаем строку в базу reptable
-                    if debug: [print(i) for i in go_report]
+                    if DEBUG: [print(i) for i in go_report]
 
                     # дополнительно копируем в буфер инфо по загрузке
                     self.copy_in_bufer(date,route) # Дата и маршрут
@@ -261,10 +264,10 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                     # вставляем в БД строку
                     for el in go_report:
                         # format go_report:
-                        # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-surname
+                        # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-dr_surn
                         # 7-tel 8- f2, 9-f1, 10-tr,
 
-                        DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,surname,tel,f2,f1,tr) VALUES (
+                        DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,tel,f2,f1,tr) VALUES (
                                           '{el[0]}',
                                           '{el[1]}',
                                           '{el[2]}',
@@ -284,24 +287,22 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.report_window = ReportWindow()
         self.report_window.show()
 
-    def path_to_bd(self):
+    def bdserver(self):
         try:
-            with open("files/sql/path.txt") as f:
+            with open("files/sql/bdserver.txt") as f:
                 return f.readline().rstrip()
         except:
             print("Error! Don't find path-file to BD")
         return None
 
-    def set_path_to_bd(self):
+    def set_bdserver(self):
         pathWindow = DbPathWindow()
-        pathWindow.line_edit.setText(self.path_to_bd())
+        pathWindow.line_edit.setText(self.bdserver())
         if pathWindow.exec_():
-            path = pathWindow.line_edit.text()
-            if not os.path.isfile(path): return None  # Проверяем наличие файла
-
-            # Сохраняем путь к файлу
-            with open("files/sql/path.txt", 'w') as f:
-                f.write(path)
+            server = pathWindow.line_edit.text()
+            # Сохраняем адресс сервера в файл
+            with open("files/sql/bdserver.txt", 'w') as f:
+                f.write(server)
 
 
     # ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ
@@ -341,9 +342,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.copy_checked_but.clicked.connect(self.copy_in_bufer)  # слушаем нажатие кнопки "КОПИРОВАТЬ"
         self.add_row_but.clicked.connect(self.add_auto)  # слушаем нажатие кнопки "ДОБАВИТЬ АВТО"
         self.go_but.clicked.connect(self.go_auto)  # слушаем нажатие кнопки "Отправить на маршрут"
-        self.path_but.clicked.connect(self.set_path_to_bd)  # слушаем нажатие кнопки "Найстройки"
+        self.path_but.clicked.connect(self.set_bdserver)  # слушаем нажатие кнопки "Найстройки"
         self.report_but.clicked.connect(self.do_report)  # слушаем нажатие кнопки "отчет"
-
 
 # class for fix out events
 class MyLineEdit(QtWidgets.QLineEdit):
@@ -355,7 +355,7 @@ class MyLineEdit(QtWidgets.QLineEdit):
         self.col = col
 
     def focusInEvent(self, event):
-        if debug: print("Focus in ivent (MyLineEdit Class)")
+        if DEBUG: print("Focus in ivent (MyLineEdit Class)")
         # проверяем, если текст в фильтре - это название фильтра - стираем
         if self.text() == self.window.table_model.headerData(self.col, QtCore.Qt.Horizontal):
             self.setText("")
@@ -367,7 +367,7 @@ class MyLineEdit(QtWidgets.QLineEdit):
         # название фильтра
         if not self.text():
             # self.setProperty("StopFilter", True)
-            if debug: print(" Focus out event (MyLineEdit Class)")
+            if DEBUG: print(" Focus out event (MyLineEdit Class)")
             self.window.filter_default_viewset(self)
         super(MyLineEdit, self).focusOutEvent(event)
 
@@ -378,7 +378,8 @@ class MySqlTableModel(QtSql.QSqlTableModel):
         self.checkeable_data = {}
 
     def flags(self, index):
-        if index.column() == COLUMNS_MAIN.index("V"):
+        if index.column() == COLUMNS_MAIN.index("V") or \
+                index.column() == COLUMNS_MAIN.index("Прізвище"):
             return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
         return QtSql.QSqlTableModel.flags(self, index)
 
