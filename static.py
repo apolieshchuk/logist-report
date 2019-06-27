@@ -1,6 +1,10 @@
 from PyQt5 import QtSql
 from PyQt5.QtGui import QFont
 
+
+DEBUG = True
+LOCAL_SERVER = False
+
 TITLE_FONT = QFont("Helvetica", 10, QFont.Bold)  # Шрифт заголовка
 
 # COPY_BUFFER_PATTERN = "name,code,mark,auto_num,trail_num,dr_dr_surn,dr_name,dr_fath,tel,notes"
@@ -11,15 +15,13 @@ COPY_BUFFER_PATTERN = [2, 4, 5, 6, 7, 8, 9, 10, 11]  # шаблон копиро
 COLUMNS_ROUTE_INFO = ["id", "Перевозчик", "Авто", "Вод", "Тел","ф2", "ф1", "ТР"]
 ROUTE_INFO_PATTERN = ["id", "name", "auto_num", "dr_surn","tel"]  # шаблон для внесения инфы по загрузке согласно ID авто
 
-# COLUMNS_REPORT_SQL = ["id", "Дата", "Маршрут", "Перевозчик", "Водитель", "ф2", "ф1",
-#                   "Трансф", "Менеджер","гос.№", "Культура","Тел"]  # INSQL!
 COLUMNS_REPORT = ["id", "Дата", "Менеджер",  "Культура", "Маршрут", "Перевозчик","гос.№", "Водитель", "Тел",
                      "ф2", "ф1", "Трансф","Примітка"]
 
 MANAGERS = ["ДемченкоВП","СалюкС","ЦыбенкоМВ","ГулинЛА","СкворцоваВН","ТютюнникЮ",
             "ПолещукАИ","ЗаливнойМ","БуртникР","КОММЕРЦИЯ","ШарпакВ"]
 CROPS = ["соняшник","пшениця","кукуруза","соя","висівки"]
-DEBUG = True
+
 
 
 def table_size(table_view):

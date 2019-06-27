@@ -1,8 +1,10 @@
 import csv
 
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtSql import *
 
-import mysql.connector
+from static import LOCAL_SERVER
+
 
 class My_Sql():
 
@@ -10,9 +12,7 @@ class My_Sql():
         #SQLITE
         # DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
         # DB.setDatabaseName(path)  # Путь к базе данных
-        # DB = QSqlDatabase().addDatabase('QODBC','odbc connection')
-        # DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;"
-        #                    "DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7")
+
 
         # MYSQL
         # DB = QSqlDatabase().addDatabase('QMYSQL','mysql connection')
@@ -21,13 +21,26 @@ class My_Sql():
         # DB.setUserName("logist")  # Путь к базе данных
         # DB.setPassword("1cjDaw4RNjhMp7")
 
+        connectString = None
+        if LOCAL_SERVER:
+            connectString = "Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = localhost;" \
+                            "DATABASE=sys;UID=root;PWD=aipx123"
+        else:
+            connectString = "Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;" \
+                            "DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7"
+
         # ODBC
         DB = QSqlDatabase().addDatabase('QODBC', 'odbc connection')
-        DB.setDatabaseName("Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;"
-                           "DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7")
+        DB.setDatabaseName(connectString)
 
-        if DB.open():  # Открываем базу данных
-            print("BD OPENING!!")
+        # Открываем базу данных
+        if DB.open():
+            print("DB OPENING!!")
+        else:
+            msg = QtWidgets.QMessageBox()
+            msg.setIcon(QtWidgets.QMessageBox.Information)
+            msg.setText("DB NOT OPEN!")
+            msg.exec_()
         return DB
 
     @staticmethod
@@ -130,7 +143,6 @@ class My_Sql():
         #     row = []
         #     for col in [0,1]:
         #         row.append(sql.value(col))
-        #     row.append("")
         #     print(row)
         #     sql2 = f"INSERT INTO routes(route) VALUES ('{row[1]}')"
         #     db_mysql.exec_(sql2)
