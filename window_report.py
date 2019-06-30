@@ -1,16 +1,19 @@
 from PyQt5 import QtWidgets, QtSql, QtCore
 from files.ui import design_report
 from filter_boxes import FilterBoxes
+from openpyxl import Workbook
 
-from static import COLUMNS_MAIN, TITLE_FONT, COLUMNS_REPORT, table_size
+from static import COLUMNS_AUTO, TITLE_FONT, COLUMNS_REPORT, table_size, create_table_model
 
 
 class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
-
     def __init__(self):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
+        # from my_sql import My_Sql
+        # self.DB = My_Sql.connect_db(str(self))
+
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
 
@@ -18,13 +21,13 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.setWindowTitle("Отчет")
 
         # Создаем таблицу
-        self.create_table_model()
+        from window_main import DB
+        self.table_model = create_table_model(DB, 'reptable')
         self.create_table_view()
-
 
         # TODO вынести в функцию
         # устанавливаем диапазон дат по умолчанию
-        date1 = QtCore.QDate.currentDate().addMonths(-3)
+        date1 = QtCore.QDate.currentDate().addMonths(-6)
         date2 = QtCore.QDate.currentDate().addDays(+1)
         self.dateEdit.setDate(date1)
         self.dateEdit_2.setDate(date2)
@@ -35,7 +38,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.start_date_edit()
 
         # создаем фильтр боксы
-        self.filter_box = FilterBoxes(self.filter_view,self.table_view)
+        self.filter_box = FilterBoxes(self.filter_view, self.table_view)
 
         # двигаем колонки на фильтрах и в основной табилце
         # self.move_view_columns(self.table_view,self.filter_box.filter_view)
@@ -43,25 +46,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # слушатель кнопки
         self.excel_but.clicked.connect(self.export_to_excel)
 
-        #TODO вывод в иксель даті в правильном формате
-
-
-
-    def create_table_model(self):
-        from window_main import DB
-
-        # фильтруем модель за период
-        self.table_model = QtSql.QSqlTableModel(None,DB)
-        self.table_model.setTable("reptable")
-        self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
-        self.table_model.select()
-
-        # DB.exec("UPDATE reptable SET route_date = CONVERT(varchar,route_date,106) WHERE id = 2190")
-
-        # создаем горизонтальную шапку
-        for col in range(self.table_model.columnCount()):
-            self.table_model.setHeaderData(col, QtCore.Qt.Horizontal, COLUMNS_REPORT[col])
-
+        # TODO вывод в иксель даті в правильном формате
 
     def create_table_view(self):
         # ------------- ВИЗУАЛИЗАЦИЯ---------------------
@@ -75,26 +60,25 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
-
         # включаем сортировку
         # TODO сортировка по дате + ID
         self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
         # self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
 
         # Форматируем вывод даты на экран отчета
-        # self.table_view.setItemDelegateForColumn(COLUMNS_REPORT.index("Дата"),
-        #                                          DateFormatDelegate('dd/MMM/yyyy'))
+        self.table_view.setItemDelegateForColumn(COLUMNS_REPORT.index("Дата"),
+                                                 DateFormatDelegate('dd/MMM/yyyy'))
 
-        # расширяем строки
+        # расширяем строки и столбцы
         self.table_view.resizeColumnsToContents()
-        self.table_view.resizeRowsToContents()
+        # self.table_view.resizeRowsToContents()
 
         # Расширяем окно, согласно длинны таблицы
         table_width = table_size(self.table_view)
         # устанавливаем ширину окна
         self.setFixedWidth(table_width)
 
-    def move_view_columns(self,*views):
+    def move_view_columns(self, *views):
         pass
         # # TODO автоматическое подтягивание индекса колонки с SQL
         # for el in views:
@@ -109,11 +93,10 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # ФИЛЬТРАЦИЯ МОДЕЛИ!
         self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}'")
-        self.table_view.resizeRowsToContents()
+        # self.table_view.resizeRowsToContents()
 
     def export_to_excel(self):
         # create blank Workbook
-        from openpyxl import Workbook
 
         wb = Workbook()
         sheet = wb['Sheet']
@@ -138,7 +121,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
                         max_length = len(cell.value)
                 except:
                     pass
-            adjusted_width = max_length+2
+            adjusted_width = max_length + 2
             sheet.column_dimensions[column].width = adjusted_width
 
         try:
@@ -150,15 +133,16 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
             messageBox.setFixedSize(500, 200)
             messageBox.exec_()
 
-    def get_row_from_view(self,row_num):
+    def get_row_from_view(self, row_num):
         row = []
         # TODO какую-то нормальную синхронизацию колонок с ВЬЮ И МУСКУЛОМ
         for col in COLUMNS_REPORT[1:]:
-            data = self.table_view.model().index(row_num,COLUMNS_REPORT.index(col)).data()
+            data = self.table_view.model().index(row_num, COLUMNS_REPORT.index(col)).data()
             if type(data).__name__ == 'QDate':
                 data = data.toString('dd.MMM.yyyy')
             row.append(data)
         return row
+
 
 class DateFormatDelegate(QtWidgets.QStyledItemDelegate):
 
@@ -167,5 +151,5 @@ class DateFormatDelegate(QtWidgets.QStyledItemDelegate):
         self.date_format = date_format
 
     def displayText(self, value, locale):
-        date = QtCore.QDate().fromString(value,'yyyy-MM-dd')
+        date = QtCore.QDate().fromString(value, 'yyyy-MM-dd')
         return date.toString(self.date_format)

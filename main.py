@@ -1,7 +1,6 @@
 import os
 
 from dial_dbpath import DbPathWindow
-from my_sql import My_Sql
 from window_main import LogistReportWindow
 from PyQt5 import QtWidgets, QtSql
 import sys  # sys нужен для передачи argv в QApplication

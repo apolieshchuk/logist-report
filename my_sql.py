@@ -1,18 +1,24 @@
 import csv
+import threading
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtSql import *
+from apscheduler.schedulers.background import BackgroundScheduler
 
-from static import LOCAL_SERVER
+from static import LOCAL_SERVER, RECONNECT_TIME_MYSQL, DEBUG
 
 
 class My_Sql():
 
+    def __init__(self):
+        self.DB = self.connect_db()
+
+
     def connect_db(self):
+
         #SQLITE
         # DB = QSqlDatabase().addDatabase('QSQLITE')  # Чем читаем Sql. QSQLITE- для sqlite
         # DB.setDatabaseName(path)  # Путь к базе данных
-
 
         # MYSQL
         # DB = QSqlDatabase().addDatabase('QMYSQL','mysql connection')
@@ -26,22 +32,36 @@ class My_Sql():
             connectString = "Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = localhost;" \
                             "DATABASE=sys;UID=root;PWD=aipx123"
         else:
-            connectString = "Driver={MySQL ODBC 8.0 Unicode Driver};SERVER = 10.12.1.240;" \
-                            "DATABASE=logist_report;UID=logist;PWD=1cjDaw4RNjhMp7"
+            connectString = f"Driver={{MySQL ODBC 8.0 Unicode Driver}};SERVER = 91.239.232.46; PORT = 3306;" \
+                                "DATABASE=aipx_logrep; UID=aipx; PWD=Fleepaipx1203"
 
         # ODBC
-        DB = QSqlDatabase().addDatabase('QODBC', 'odbc connection')
-        DB.setDatabaseName(connectString)
+        self.DB = QSqlDatabase().addDatabase('QODBC', 'first connect')
+        self.DB.setDatabaseName(connectString)
+        # DB.setConnectOptions('MYSQL_OPT_RECONNECT = 1')
 
         # Открываем базу данных
-        if DB.open():
+        if self.DB.open():
             print("DB OPENING!!")
+
+            # Коннектимся постоянно к базе данныж, что б не выбрасывало с сервера
+            scheduler = BackgroundScheduler()
+            scheduler.start()
+
+            scheduler.add_job(self.reconnect_to_mysql, 'interval', seconds=RECONNECT_TIME_MYSQL)
+
         else:
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Information)
-            msg.setText("DB NOT OPEN!")
+            # msg.setText("DB NOT OPEN!")
+            msg.setText(self.DB.lastError().text())
+            print(self.DB.lastError().text())
             msg.exec_()
-        return DB
+        return self.DB
+
+    def reconnect_to_mysql(self):
+        self.DB.exec("SELECT id FROM auto WHERE id = 1")
+        if DEBUG: print(f"DB reconnected!")
 
     @staticmethod
     def add_report_from_csv(csv,db):
@@ -112,7 +132,7 @@ class My_Sql():
 
 
         # insert auto
-        # sql = db_sqlite.exec_("SELECT * FROM auto")
+        # sql = db_sqlite.exec_("SELECT * FROM mytable")
         # # print(sql.size())
         # while sql.next():
         #     row = []
@@ -136,8 +156,8 @@ class My_Sql():
         #            f" VALUES ('{row[1]}','{row[2]}','{row[3]}','{row[4]}','{row[5]}','{row[6]}','{row[7]}','{row[8]}','{row[9]}'," \
         #            f"'{row[10]}','{row[11]}','{row[12]}')"
         #     db_mysql.exec_(sql2)
-
-        # insert routes
+        #
+        # # insert routes
         # sql = db_sqlite.exec_("SELECT * FROM routes")
         # while sql.next():
         #     row = []

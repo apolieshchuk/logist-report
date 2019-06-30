@@ -7,16 +7,20 @@ from static import TITLE_FONT, ROUTE_INFO_PATTERN, COLUMNS_ROUTE_INFO, MANAGERS,
 
 DEBUG = True
 
+
 class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
 
-    def __init__(self, id_set,route):
+    def __init__(self, id_set, route):
+        # from my_sql import My_Sql
+        # self.DB = My_Sql.connect_db(str(self))
+
         super().__init__()
         self.id_set = id_set
         self.setupUi(self)
         self.route = route
+
         self.create_table_model()
         self.create_table_view()
-
 
         self.date_edit.setDate(QtCore.QDate.currentDate())
 
@@ -25,24 +29,23 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         try:
             manager = self.most_used_on_route("manager")
             ind = self.manager_box.findText(manager)
-            if  ind != -1:
+            if ind != -1:
                 self.manager_box.setCurrentIndex(ind)
         except:
             print("PASS Except!")
-
 
         self.crop_box.addItems(CROPS)
         # устанавливаем значение основной культуры на маршруте
         try:
             crop = self.most_used_on_route("crop")
             ind = self.crop_box.findText(crop)
-            if  ind != -1:
+            if ind != -1:
                 self.crop_box.setCurrentIndex(ind)
         except:
             print("PASS Except!")
 
     def create_table_model(self):
-        from window_main import DB
+
         # ------------- МОДЕЛЬ---------------------
         # создаем модель таблицы
         self.table_model = QtGui.QStandardItemModel()
@@ -54,6 +57,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         for id in self.id_set:
             # формируем sql запрос
 
+            from window_main import DB
             sql = DB.exec(f"SELECT * FROM auto WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
             sql.next()
@@ -93,9 +97,9 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                 inp_text.setFixedWidth(self.table_view.columnWidth(col))
                 inp_text.setFixedHeight(self.table_view.rowHeight(row))
                 if col == COLUMNS_ROUTE_INFO.index("ф1"):
-                    inp_text.setText(str(self.most_used_on_route('f1',10)))
+                    inp_text.setText(str(self.most_used_on_route('f1', 5)))
                 elif col == COLUMNS_ROUTE_INFO.index("ф2"):
-                    inp_text.setText(str(self.most_used_on_route('f2',10)))
+                    inp_text.setText(str(self.most_used_on_route('f2', 5)))
                 # добавляем его в таблицу
                 self.table_view.setIndexWidget(self.table_model.index(row, col), inp_text)
 
@@ -106,7 +110,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
             lst_widg.addItem("НЕТ")
             lst_widg.addItem("ДА")
             # устанавливаем значение трансформации на маршруте
-            tr = self.most_used_on_route("tr",10)
+            tr = self.most_used_on_route("tr", 10)
             ind = lst_widg.findText(tr)
             if ind != -1:
                 lst_widg.setCurrentIndex(ind)
@@ -118,11 +122,12 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
-    def most_used_on_route(self, item, limit = 18446744073709551615):
+    def most_used_on_route(self, item, limit=18446744073709551615):
+
         # limit - количество ПОСЛЕДНИХ по ID записей
         from window_main import DB
         sql = DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
-                      f" ORDER BY id DESC LIMIT {limit} ")
+                           f" ORDER BY id DESC LIMIT {limit} ")
         dict = {}
         while sql.next():
             val = sql.value(item)
@@ -130,8 +135,8 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                 dict[val] += 1
             else:
                 dict[val] = 1
-        sorted_dict = sorted(dict.items(), key=operator.itemgetter(1), reverse= True)
-        if DEBUG: print (sorted_dict)
+        sorted_dict = sorted(dict.items(), key=operator.itemgetter(1), reverse=True)
+        if DEBUG: print(sorted_dict)
         if len(sorted_dict) > 0:
             return sorted_dict[0][0]
         return ""

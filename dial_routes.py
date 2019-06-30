@@ -5,42 +5,24 @@ from files.ui import design_routes_dial
 from PyQt5 import QtWidgets, QtGui, QtCore, QtSql
 
 from filter_boxes import FilterBoxes
-from static import TITLE_FONT, table_size
+from static import TITLE_FONT, table_size, create_table_model
 
 
 class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
 
     def __init__(self):
+        # from my_sql import My_Sql
+        # self.DB = My_Sql.connect_db(str(self))
+
         super().__init__()
         self.setupUi(self)
-        self.create_table_model()
+        from window_main import DB
+        self.table_model = create_table_model(DB,'routes')
         self.create_table_view()
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)
         self.table_view.doubleClicked.connect(self.double_clicked)  # слушаем дабл клик
         self.add_route_but.clicked.connect(self.add_route)  # слушаем кнопку добавить маршрут
 
-    def create_table_model(self):
-        from window_main import DB
-
-        # from window_main import DB
-        self.table_model = QtSql.QSqlTableModel(None, DB)
-        self.table_model.setTable("routes")
-        self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
-        self.table_model.select()
-
-        # RECOMMIT IF MUST TAKE DB FROM CSV
-        # CSV FORMAT - [route,random]
-        # db = self.csv_to_sql("files/routes.csv")  # загружаем базу маршрутов в таблицу маршрутов SQL
-        # # загружаем маршруты с csv в sql
-        # for el in db:
-        #     DB.exec(f"""INSERT INTO routes(name) VALUES ('{el[0]}')""")
-        #     DB.commit()
-
-        # создаем горизонтальную шапку
-        h_head = ['id', 'Маршрут']
-        # создаем горизонтальную шапку
-        for col in range(self.table_model.columnCount()):
-            self.table_model.setHeaderData(col, QtCore.Qt.Horizontal, h_head[col])
 
     def create_table_view(self):
         # ------------- ВИЗУАЛИЗАЦИЯ---------------------
@@ -83,6 +65,7 @@ class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
         self.accept()
 
     def add_route(self):
+
         txt = self.line_edit.text()
         if re.match(r".*-.*",txt): # если вводимый текст совпадает формату ".... - ...."
             from window_main import DB

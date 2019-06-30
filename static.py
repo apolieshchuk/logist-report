@@ -1,14 +1,16 @@
-from PyQt5 import QtSql
+from PyQt5 import QtSql, QtCore
 from PyQt5.QtGui import QFont
+
 
 
 DEBUG = True
 LOCAL_SERVER = False
+RECONNECT_TIME_MYSQL = 55 #seconds
 
 TITLE_FONT = QFont("Helvetica", 10, QFont.Bold)  # Шрифт заголовка
 
 # COPY_BUFFER_PATTERN = "name,code,mark,auto_num,trail_num,dr_dr_surn,dr_name,dr_fath,tel,notes"
-COLUMNS_MAIN = ["id", "V", "Назва", "ЄДРПОУ", "Марка", "№ авто", "№ прич", "Прізвище",
+COLUMNS_AUTO = ["id", "V", "Назва", "ЄДРПОУ", "Марка", "№ авто", "№ прич", "Прізвище",
                 "Ім`я", "По-батькові", "Телефон", "Замітки"]
 COPY_BUFFER_PATTERN = [2, 4, 5, 6, 7, 8, 9, 10, 11]  # шаблон копирования авто в буфер (номера колонок)
 
@@ -36,3 +38,57 @@ def table_size(table_view):
     # скрол бар
     scroll = 45
     return table_width + vert_head_width + scroll
+
+def create_table_model(DB,table):
+
+    # создаем модель таблицы
+    if table == 'auto':
+        table_model = MySqlTableModel(None, DB)
+    else:
+        table_model = QtSql.QSqlTableModel(None, DB)
+    table_model.setTable(table)
+    table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
+    table_model.select()
+
+    # создаем горизонтальную шапку
+    head = None
+    if table == 'auto': head = COLUMNS_AUTO
+    if table == 'reptable': head = COLUMNS_REPORT
+    if table == 'routes': head = ['id', 'Маршрут']
+
+    for col in range(table_model.columnCount()):
+        table_model.setHeaderData(col, QtCore.Qt.Horizontal, head[col])
+
+    return table_model
+
+class MySqlTableModel(QtSql.QSqlTableModel):
+
+    def __init__(self, *args, **kwargs):
+        QtSql.QSqlTableModel.__init__(self, *args, **kwargs)
+        self.checkeable_data = {}
+
+    def flags(self, index):
+        # TODO ПОле фамилии -надо едитебл
+        if index.column() == COLUMNS_AUTO.index("V") or \
+                index.column() == COLUMNS_AUTO.index("Прізвище"):
+            return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
+        return QtSql.QSqlTableModel.flags(self, index)
+
+    def data(self, index, role=QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
+                                                 QtCore.Qt.ItemIsUserCheckable !=
+                                                 QtCore.Qt.NoItemFlags):
+            if index.row() not in self.checkeable_data.keys():
+                self.setData(index, QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
+            return self.checkeable_data[index.row()]
+        else:
+            return QtSql.QSqlTableModel.data(self, index, role)
+
+    def setData(self, index, value, role=QtCore.Qt.EditRole):
+        if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
+                                                 QtCore.Qt.ItemIsUserCheckable !=
+                                                 QtCore.Qt.NoItemFlags):
+            self.checkeable_data[index.row()] = value
+            self.dataChanged.emit(index, index, (role,))
+            return True
+        return QtSql.QSqlTableModel.setData(self, index, value, role)

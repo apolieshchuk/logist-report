@@ -8,19 +8,19 @@ from my_sql import My_Sql
 from window_report import ReportWindow
 from dial_routes import RoutesWindow
 from static import *
-import os
+
 
 from files.ui import design
-
 
 DB = None
 
 class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
     def __init__(self):
+        # DB = My_Sql.connect_db("Auto connect")
+        # from my_sql import My_Sql
         global DB
-        DB = My_Sql().connect_db()
-        # DB = My_Sql().connect_db(self.path_to_bd())
+        DB = My_Sql().DB
 
         # ПЕРЕНОС С SQLITE В MYSQL
         # My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
@@ -30,6 +30,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
         # My_Sql.data_format_in_db
+
 
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
@@ -41,38 +42,23 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
         # меняем титл окна
         self.setWindowTitle("База авто")
-        self.create_table_model()  # Функция которая вносит базу данных в QStandartItemModel
+        self.table_model = create_table_model(DB,'auto')  # Функция которая вносит базу данных в QStandartItemModel
         self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)  # создаем фильтр-боксы
         self.create_deselect_but()
         self.buttons_listeners()
 
-
+    def closeEvent(self, event):
+        self.stopThread = True
+        super(LogistReportWindow, self).closeEvent(event)
 
     def create_deselect_but(self):
         # кнопка деселект
         deselect_but = QtWidgets.QPushButton("DEL")
         deselect_but.setFixedSize(35, 20)
         deselect_but.clicked.connect(self.clear_check_and_filters)
-        self.filter_box.filter_view.setIndexWidget(self.filter_box.filter_model.index(0, COLUMNS_MAIN.index("V")),
+        self.filter_box.filter_view.setIndexWidget(self.filter_box.filter_model.index(0, COLUMNS_AUTO.index("V")),
                                                    deselect_but)
-
-    # НИЖНЯЯ ТАБЛИЦА ГЛАВНОГО ОКНА
-    def create_table_model(self):
-
-        # сортируем базу данных по алфавиту
-        # TODO сортировка украинских букв
-
-        self.table_model = MySqlTableModel(None,DB)
-        # создаем модель таблицы
-        # DB.close()
-        self.table_model.setTable("auto")
-        self.table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
-        self.table_model.select()
-
-        # создаем горизонтальную шапку
-        for col in range(self.table_model.columnCount()):
-            self.table_model.setHeaderData(col, QtCore.Qt.Horizontal, COLUMNS_MAIN[col])
 
     def create_table_view(self):
 
@@ -80,14 +66,14 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_view.setModel(self.table_model)
 
         # расширяем колонки
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("V"), 1)  # чекбокс
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("Назва"), 230)  # перевоз
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("ЄДРПОУ"), 70)  # инд код
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("Марка"), 85)  # Марка
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("№ авто"), 80)  # гн Авто
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("№ прич"), 80)  # гн Прицепа
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("Телефон"), 90)  # тел
-        self.table_view.setColumnWidth(COLUMNS_MAIN.index("Замітки"), 150)  # вод удостовер
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("V"), 1)  # чекбокс
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Назва"), 230)  # перевоз
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("ЄДРПОУ"), 70)  # инд код
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Марка"), 85)  # Марка
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("№ авто"), 80)  # гн Авто
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("№ прич"), 80)  # гн Прицепа
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Телефон"), 90)  # тел
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Замітки"), 150)  # вод удостовер
 
         # Скрываем колонку ID
         self.table_view.hideColumn(0)
@@ -115,7 +101,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.setFixedWidth(table_width + but_width)
 
         # включаем сортировку
-        self.table_view.sortByColumn(COLUMNS_MAIN.index("Назва"), QtCore.Qt.AscendingOrder)
+        self.table_view.sortByColumn(COLUMNS_AUTO.index("Назва"), QtCore.Qt.AscendingOrder)
 
         # удлиняем строки по содержимому
         # self.table_view.resizeRowsToContents()
@@ -167,7 +153,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             widg.filter_default_viewset(self.table_view)
 
         # пересоздаем окно и обнуляем список выделения
-        # self.table_model.select()
+        self.table_model.select()
         # TODO Долго ресайзит роус ту контентс
         self.table_view.setModel(self.table_model)
         # self.table_view.resizeRowsToContents()
@@ -306,6 +292,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
 
     # ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ
+
+
     def get_checked_ids(self):
         s = set()
         data_in_checkbox = self.table_model.checkeable_data.items()
@@ -323,7 +311,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # расширяем строки по содержимому
         taker_view.resizeRowsToContents()
         # меняем колонки местами (чекбокс вперед)
-        taker_view.horizontalHeader().moveSection(COLUMNS_MAIN.index("V"), 0)
+        taker_view.horizontalHeader().moveSection(COLUMNS_AUTO.index("V"), 0)
         # taker_view.setColumnWidth(CHECKBOX_INDEX, 1)
         # уравниваем ширину верхней и нижней таблиц
         tabl_head_width = giver_view.verticalHeader().width()
@@ -370,34 +358,3 @@ class MyLineEdit(QtWidgets.QLineEdit):
             if DEBUG: print(" Focus out event (MyLineEdit Class)")
             self.window.filter_default_viewset(self)
         super(MyLineEdit, self).focusOutEvent(event)
-
-class MySqlTableModel(QtSql.QSqlTableModel):
-
-    def __init__(self, *args, **kwargs):
-        QtSql.QSqlTableModel.__init__(self, *args, **kwargs)
-        self.checkeable_data = {}
-
-    def flags(self, index):
-        if index.column() == COLUMNS_MAIN.index("V") or \
-                index.column() == COLUMNS_MAIN.index("Прізвище"):
-            return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
-        return QtSql.QSqlTableModel.flags(self, index)
-
-    def data(self, index, role=QtCore.Qt.DisplayRole):
-        if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
-                                                 QtCore.Qt.ItemIsUserCheckable !=
-                                                 QtCore.Qt.NoItemFlags):
-            if index.row() not in self.checkeable_data.keys():
-                self.setData(index, QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
-            return self.checkeable_data[index.row()]
-        else:
-            return QtSql.QSqlTableModel.data(self, index, role)
-
-    def setData(self, index, value, role=QtCore.Qt.EditRole):
-        if role == QtCore.Qt.CheckStateRole and (self.flags(index)&
-                                                 QtCore.Qt.ItemIsUserCheckable !=
-                                                 QtCore.Qt.NoItemFlags):
-            self.checkeable_data[index.row()] = value
-            self.dataChanged.emit(index, index, (role,))
-            return True
-        return QtSql.QSqlTableModel.setData(self, index, value, role)

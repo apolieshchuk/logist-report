@@ -6,6 +6,9 @@ DEBUG = True
 class FilterBoxes(QtWidgets.QMainWindow):
 
     def __init__(self, filter_view, table_view):
+        # from my_sql import My_Sql
+        # self.DB = My_Sql.connect_db(str(self))
+
         super().__init__()
         self.filter_model = QtGui.QStandardItemModel()  # модель фильтра
         self.filter_view = filter_view  # вид фильтра
@@ -18,10 +21,11 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # TODO фильтры выбора
 
     def get_sql_table_header(self):
-        from window_main import DB
+
         # Берем шапку с используемой таблицы
         table = self.origin_table_model.tableName()
-        sql = DB.exec_(f"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}'")
+        from window_main import DB
+        sql = DB.exec(f"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}'")
         header = []
         while sql.next():
             header.append(sql.value(3))
