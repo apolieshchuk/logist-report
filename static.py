@@ -10,19 +10,19 @@ RECONNECT_TIME_MYSQL = 55 #seconds
 TITLE_FONT = QFont("Helvetica", 10, QFont.Bold)  # Шрифт заголовка
 
 # COPY_BUFFER_PATTERN = "name,code,mark,auto_num,trail_num,dr_dr_surn,dr_name,dr_fath,tel,notes"
-COLUMNS_AUTO = ["id", "V", "Назва", "ЄДРПОУ", "Марка", "№ авто", "№ прич", "Прізвище",
-                "Ім`я", "По-батькові", "Телефон", "Замітки"]
+COLUMNS_AUTO = ["id", "v", "Назва", "ЄДРПОУ", "Марка", "№ авто", "№ прич", "Прізвище",
+                "Ім`я", "По-батькові", "Телефон", "Замітки","v2"]
 COPY_BUFFER_PATTERN = [2, 4, 5, 6, 7, 8, 9, 10, 11]  # шаблон копирования авто в буфер (номера колонок)
 
-COLUMNS_ROUTE_INFO = ["id", "Перевозчик", "Авто", "Вод", "Тел","ф2", "ф1", "ТР"]
+COLUMNS_ROUTE_INFO = ["id", "Перевозчик", "Авто", "Вод", "Тел","ф2", "ф1", "ТР", "Прим."]
 ROUTE_INFO_PATTERN = ["id", "name", "auto_num", "dr_surn","tel"]  # шаблон для внесения инфы по загрузке согласно ID авто
 
 COLUMNS_REPORT = ["id", "Дата", "Менеджер",  "Культура", "Маршрут", "Перевозчик","гос.№", "Водитель", "Тел",
                      "ф2", "ф1", "Трансф","Примітка"]
 
 MANAGERS = ["ДемченкоВП","СалюкС","ЦыбенкоМВ","ГулинЛА","СкворцоваВН","ТютюнникЮ",
-            "ПолещукАИ","ЗаливнойМ","БуртникР","КОММЕРЦИЯ","ШарпакВ"]
-CROPS = ["соняшник","пшениця","кукуруза","соя","висівки"]
+            "ПолещукАИ","ЗаливнойМ","БуртникР","КОММЕРЦИЯ","ШарпакВ","РудаО","KSG"]
+CROPS = ["соняшник","пшениця","кукуруза","соя","висівки","ячмінь"]
 
 
 
@@ -55,7 +55,6 @@ def create_table_model(DB,table):
     if table == 'auto': head = COLUMNS_AUTO
     if table == 'reptable': head = COLUMNS_REPORT
     if table == 'routes': head = ['id', 'Маршрут']
-
     for col in range(table_model.columnCount()):
         table_model.setHeaderData(col, QtCore.Qt.Horizontal, head[col])
 
@@ -69,8 +68,8 @@ class MySqlTableModel(QtSql.QSqlTableModel):
 
     def flags(self, index):
         # TODO ПОле фамилии -надо едитебл
-        if index.column() == COLUMNS_AUTO.index("V") or \
-                index.column() == COLUMNS_AUTO.index("Прізвище"):
+        if index.column() == COLUMNS_AUTO.index("v") or \
+                index.column() == COLUMNS_AUTO.index("v2"):
             return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
         return QtSql.QSqlTableModel.flags(self, index)
 

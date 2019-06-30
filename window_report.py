@@ -65,13 +65,16 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
         # self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
 
-        # Форматируем вывод даты на экран отчета
+        !!! НЕ ВИДИТ ВЕСЬ ОТЧЕТ!# Форматируем вывод даты на экран отчета
         self.table_view.setItemDelegateForColumn(COLUMNS_REPORT.index("Дата"),
                                                  DateFormatDelegate('dd/MMM/yyyy'))
 
         # расширяем строки и столбцы
         self.table_view.resizeColumnsToContents()
         # self.table_view.resizeRowsToContents()
+
+        # TODO почему автоматом не расширяет?
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("Дата"), 80)
 
         # Расширяем окно, согласно длинны таблицы
         table_width = table_size(self.table_view)

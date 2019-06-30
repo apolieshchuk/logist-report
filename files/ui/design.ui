@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>678</width>
-    <height>650</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,6 +29,22 @@
       <property name="leftMargin">
        <number>0</number>
       </property>
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>32</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <widget class="QPushButton" name="copy_checked_but">
         <property name="sizePolicy">
@@ -53,11 +69,11 @@
          <string notr="true">Text-align:left</string>
         </property>
         <property name="text">
-         <string>Копировать</string>
+         <string>Копіювати</string>
         </property>
         <property name="icon">
-         <iconset resource="../qtimg.qrc">
-          <normaloff>:/files/icons/copy.png</normaloff>:/files/icons/copy.png</iconset>
+         <iconset resource="qtimg.qrc">
+          <normaloff>:/icons/copy.png</normaloff>:/icons/copy.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -79,11 +95,11 @@
          <string notr="true">Text-align:left</string>
         </property>
         <property name="text">
-         <string>Добавить авто</string>
+         <string>Додати авто</string>
         </property>
         <property name="icon">
-         <iconset resource="../qtimg.qrc">
-          <normaloff>:/files/icons/addauto.png</normaloff>:/files/icons/addauto.png</iconset>
+         <iconset resource="qtimg.qrc">
+          <normaloff>:/icons/addauto.png</normaloff>:/icons/addauto.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -105,12 +121,12 @@
          <string notr="true">Text-align:left</string>
         </property>
         <property name="text">
-         <string>Отправить на
+         <string>Відправити на
      маршрут</string>
         </property>
         <property name="icon">
-         <iconset resource="../qtimg.qrc">
-          <normaloff>:/files/icons/goauto.png</normaloff>:/files/icons/goauto.png</iconset>
+         <iconset resource="qtimg.qrc">
+          <normaloff>:/icons/goauto.png</normaloff>:/icons/goauto.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -135,11 +151,11 @@
          <string notr="true">Text-align:left</string>
         </property>
         <property name="text">
-         <string>  Отчет</string>
+         <string>   Звіт</string>
         </property>
         <property name="icon">
-         <iconset resource="../qtimg.qrc">
-          <normaloff>:/files/icons/report.png</normaloff>:/files/icons/report.png</iconset>
+         <iconset resource="qtimg.qrc">
+          <normaloff>:/icons/report.png</normaloff>:/icons/report.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -177,6 +193,70 @@
        <number>0</number>
       </property>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="qtimg.qrc">:/icons/mylogo(24x24).ico</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="QLabel" name="label_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Book Antiqua</family>
+            <pointsize>14</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>   БАЗА ДАНИХ ГК &quot;ФОРМУЛА СМАКУ&quot;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="QTableView" name="filter_view">
         <property name="enabled">
          <bool>true</bool>
@@ -202,7 +282,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../qtimg.qrc"/>
+  <include location="qtimg.qrc"/>
  </resources>
  <connections/>
 </ui>

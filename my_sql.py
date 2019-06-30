@@ -47,7 +47,6 @@ class My_Sql():
             # Коннектимся постоянно к базе данныж, что б не выбрасывало с сервера
             scheduler = BackgroundScheduler()
             scheduler.start()
-
             scheduler.add_job(self.reconnect_to_mysql, 'interval', seconds=RECONNECT_TIME_MYSQL)
 
         else:
@@ -66,9 +65,8 @@ class My_Sql():
     @staticmethod
     def add_report_from_csv(csv,db):
         report = My_Sql.csv_to_list(csv)
-        print(report[1])
         for el in report:
-            db.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,f2,f1,tr) VALUES (
+            db.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,tel,f2,f1,tr,notes) VALUES (
                                                   '{el['route_date']}',
                                                   '{el['manager']}',
                                                   '{el['route']}',
@@ -76,9 +74,11 @@ class My_Sql():
                                                   '{el['carrier']}',
                                                   '{el['auto_num']}',
                                                   '{el['dr_surn']}',
+                                                  '{el['tel']}',
                                                   '{el['f2']}',
                                                   '{el['f1']}',
-                                                  '{el['tr']}'
+                                                  '{el['tr']}',
+                                                  '{el['notes']}'
                                               )""")
             db.commit()
 

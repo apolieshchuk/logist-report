@@ -26,7 +26,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
 
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ЗАГРУЗИТЬ ОТЧЕТ С CSV!
-        # My_Sql.add_report_from_csv("files/sql/report.csv", DB)
+        # My_Sql.add_report_from_csv("files/sql/2018.csv", DB)
 
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
         # My_Sql.data_format_in_db
@@ -45,6 +45,10 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_model = create_table_model(DB,'auto')  # Функция которая вносит базу данных в QStandartItemModel
         self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)  # создаем фильтр-боксы
+
+        # двигаем колонки на фильтрах и в основной табилце
+        self.move_view_columns(self.table_view, self.filter_box.filter_view)
+
         self.create_deselect_but()
         self.buttons_listeners()
 
@@ -57,7 +61,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         deselect_but = QtWidgets.QPushButton("DEL")
         deselect_but.setFixedSize(35, 20)
         deselect_but.clicked.connect(self.clear_check_and_filters)
-        self.filter_box.filter_view.setIndexWidget(self.filter_box.filter_model.index(0, COLUMNS_AUTO.index("V")),
+        self.filter_box.filter_view.setIndexWidget(self.filter_box.filter_model.index(0, COLUMNS_AUTO.index("v")),
                                                    deselect_but)
 
     def create_table_view(self):
@@ -66,10 +70,11 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_view.setModel(self.table_model)
 
         # расширяем колонки
-        self.table_view.setColumnWidth(COLUMNS_AUTO.index("V"), 1)  # чекбокс
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("v"), 1)  # чекбокс
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("v2"), 1)  # чекбокс2
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("Назва"), 230)  # перевоз
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("ЄДРПОУ"), 70)  # инд код
-        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Марка"), 85)  # Марка
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Марка"), 60)  # Марка
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("№ авто"), 80)  # гн Авто
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("№ прич"), 80)  # гн Прицепа
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("Телефон"), 90)  # тел
@@ -78,16 +83,15 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # Скрываем колонку ID
         self.table_view.hideColumn(0)
 
-
         # меняем колонки местами (чекбокс вперед)
         # self.table_view.horizontalHeader().moveSection(CHECKBOX_COLUMN, 0)
 
         # создаем чекбокс Делегат
         # delegate = CheckBoxDelegate(None)
-        # self.table_view.setItemDelegateForColumn(COLUMNS_MAIN.index("V"), delegate)
+        # self.table_view.setItemDelegateForColumn(COLUMNS_MAIN.index("v"), delegate)
 
         # делаем слушатели tableview
-        self.table_view.clicked.connect(self.table_clicked)
+        # self.table_view.clicked.connect(self.table_clicked)
 
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
@@ -106,11 +110,16 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # удлиняем строки по содержимому
         # self.table_view.resizeRowsToContents()
 
+    def move_view_columns(self, *views):
+        for el in views:
+            el.horizontalHeader().moveSection(COLUMNS_AUTO.index("v2"), 7)
+
+
     def table_clicked(self, index_in_view):
         pass
-        # if index_in_view.column() == COLUMNS_MAIN.index("V"):
+        # if index_in_view.column() == COLUMNS_MAIN.index("v"):
         #     print(self.table_model.checkeable_data)
-        # if index_in_view.column() == COLUMNS_MAIN.index("V"):
+        # if index_in_view.column() == COLUMNS_MAIN.index("v"):
         #     print(self.table_model.checkeable_data)
         #     # берем текущую VIEW модель (на случай фильтра в том числе)
         #     model = self.table_view.model()
@@ -121,7 +130,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         #     print(id)
         # ПРОРАБОТАТЬ ЕСЛИ КОЛОНКА УДАЛИТСЯ!!
         # При клике на флажок добавляет рядок в "отмеченные"
-        # if index_in_view.column() == COLUMNS_MAIN.index("V"):  # если кликают на колонку checkbox
+        # if index_in_view.column() == COLUMNS_MAIN.index("v"):  # если кликают на колонку checkbox
         #     # берем текущую VIEW модель (на случай фильтра в том числе)
         #     model = self.table_view.model()
         #     # берем нужную клетку с уникальным полем "id"
@@ -253,7 +262,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                         # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-dr_surn
                         # 7-tel 8- f2, 9-f1, 10-tr,
 
-                        DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,tel,f2,f1,tr) VALUES (
+                        DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,tel,f2,f1,tr,notes) VALUES (
                                           '{el[0]}',
                                           '{el[1]}',
                                           '{el[2]}',
@@ -264,7 +273,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                                           '{el[7]}',
                                           '{el[8]}',
                                           '{el[9]}',
-                                          '{el[10]}'
+                                          '{el[10]}',
+                                          '{el[11]}'
                                       )""")
                         DB.commit()
                     self.clear_check_and_filters()
@@ -311,7 +321,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # расширяем строки по содержимому
         taker_view.resizeRowsToContents()
         # меняем колонки местами (чекбокс вперед)
-        taker_view.horizontalHeader().moveSection(COLUMNS_AUTO.index("V"), 0)
+        taker_view.horizontalHeader().moveSection(COLUMNS_AUTO.index("v"), 0)
         # taker_view.setColumnWidth(CHECKBOX_INDEX, 1)
         # уравниваем ширину верхней и нижней таблиц
         tabl_head_width = giver_view.verticalHeader().width()

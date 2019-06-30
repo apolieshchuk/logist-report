@@ -90,7 +90,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         text_inputs = []
         text_inputs.append(COLUMNS_ROUTE_INFO.index("ф1"))
         text_inputs.append(COLUMNS_ROUTE_INFO.index("ф2"))
-        # print()
+        text_inputs.append(COLUMNS_ROUTE_INFO.index("Прим."))
         for col in text_inputs:  # bc checkbox "CHECKBOX_INDEX" col
             for row in range(self.table_model.rowCount()):
                 inp_text = MyLineEdit(self, row, col)
@@ -107,8 +107,8 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         col = COLUMNS_ROUTE_INFO.index("ТР")
         for row in range(self.table_model.rowCount()):
             lst_widg = QtWidgets.QComboBox()
-            lst_widg.addItem("НЕТ")
-            lst_widg.addItem("ДА")
+            lst_widg.addItem("НІ")
+            lst_widg.addItem("ТАК")
             # устанавливаем значение трансформации на маршруте
             tr = self.most_used_on_route("tr", 10)
             ind = lst_widg.findText(tr)

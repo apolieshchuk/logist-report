@@ -55,6 +55,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # поля инпута(фильтры)
         for col in range(self.filter_model.columnCount()):  # bc checkbox "CHECKBOX_INDEX" col
             filter_text = MyLineEdit(self.table_view.window(), 0, col)
+            filter_text.setMinimumWidth(1) # для чекбокса поля CHk
             # добавляем его в таблицу
             self.filter_view.setIndexWidget(self.filter_model.index(0, col), filter_text)
             # меняем значение фильтра по Умолчанию под название колонок
@@ -67,8 +68,11 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # расширяем колонки
         for col in range(giver_view.model().columnCount()):
             taker_view.setColumnWidth(col, giver_view.columnWidth(col))
+
         # расширяем строки по содержимому
+        # ВАЖНО для того ччтоб ввод не обрезало
         taker_view.resizeRowsToContents()
+
         # уравниваем ширину верхней и нижней таблиц
         tabl_head_width = giver_view.verticalHeader().width()
         taker_view.verticalHeader().setMinimumWidth(tabl_head_width)
