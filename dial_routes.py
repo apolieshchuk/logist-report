@@ -69,7 +69,7 @@ class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
         txt = self.line_edit.text()
         if re.match(r".*-.*",txt): # если вводимый текст совпадает формату ".... - ...."
             from window_main import DB
-            DB.exec(f"""INSERT INTO routes(name) VALUES ('{txt}')""")
+            DB.exec(f"""INSERT INTO routes(route) VALUES ('{txt}')""")
             DB.commit()
             self.table_model.select()
 

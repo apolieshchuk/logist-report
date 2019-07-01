@@ -3,7 +3,6 @@ import threading
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtSql import *
-from apscheduler.schedulers.background import BackgroundScheduler
 
 from static import LOCAL_SERVER, RECONNECT_TIME_MYSQL, DEBUG
 
@@ -44,10 +43,10 @@ class My_Sql():
         if self.DB.open():
             print("DB OPENING!!")
 
-            # Коннектимся постоянно к базе данныж, что б не выбрасывало с сервера
-            scheduler = BackgroundScheduler()
-            scheduler.start()
-            scheduler.add_job(self.reconnect_to_mysql, 'interval', seconds=RECONNECT_TIME_MYSQL)
+            # # Коннектимся постоянно к базе данныж, что б не выбрасывало с сервера
+            # scheduler = BackgroundScheduler()
+            # scheduler.start()
+            # scheduler.add_job(self.reconnect_to_mysql, 'interval', seconds=RECONNECT_TIME_MYSQL)
 
         else:
             msg = QtWidgets.QMessageBox()

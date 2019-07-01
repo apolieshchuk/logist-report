@@ -1,3 +1,5 @@
+import threading
+
 import pyperclip  # copy in bufer
 from PyQt5 import QtWidgets, QtCore, QtSql
 from dial_addauto import AddAutoWindow
@@ -21,7 +23,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # from my_sql import My_Sql
         global DB
         DB = My_Sql().DB
-
         # ПЕРЕНОС С SQLITE В MYSQL
         # My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
 
@@ -31,11 +32,13 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # РАССКОМИТИТЬ ЕСЛИ НУЖНО ИЗМЕНИТЬ ФОРМАТ ДАТЫ
         # My_Sql.data_format_in_db
 
-
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+
+        self.stopThread = False
+        self.reconnect_to_mysql()
 
         # отключаем кнопку настроек сервера
         self.path_but.hide()
@@ -53,6 +56,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.buttons_listeners()
 
     def closeEvent(self, event):
+        # TODO Остановить поток сразу при закрытии
         self.stopThread = True
         super(LogistReportWindow, self).closeEvent(event)
 
@@ -300,9 +304,12 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             with open("files/sql/bdserver.txt", 'w') as f:
                 f.write(server)
 
-
     # ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ
-
+    def reconnect_to_mysql(self):
+        if self.stopThread: return
+        threading.Timer(55.0, self.reconnect_to_mysql).start()
+        DB.exec("SELECT id FROM auto WHERE id = 1")
+        if DEBUG: print(f"DB reconnected!")
 
     def get_checked_ids(self):
         s = set()

@@ -80,6 +80,7 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         self.table_view.resizeRowsToContents()
         self.table_view.resizeColumnsToContents()
         self.table_view.setColumnWidth(COLUMNS_ROUTE_INFO.index("ТР"), 50)  # Трансформация
+        self.table_view.setColumnWidth(COLUMNS_ROUTE_INFO.index("Прим."), 150)  # Примітки
 
         # Скрываем колонку ID
         self.table_view.hideColumn(0)
