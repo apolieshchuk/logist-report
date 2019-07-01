@@ -1,0 +1,14 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>../icons/addauto.png</file>
+    <file>../icons/copy.png</file>
+    <file>../icons/goauto.png</file>
+    <file>../icons/report.png</file>
+    <file>../icons/my_logo.png</file>
+    <file>../icons/mylogo(48x48).ico</file>
+    <file>../icons/mylogo(32x32).ico</file>
+    <file>../icons/mylogo(256x256).ico</file>
+    <file>../icons/mylogo(16x16).ico</file>
+    <file>../icons/mylogo(24x24).ico</file>
+</qresource>
+</RCC>
