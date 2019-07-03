@@ -50,6 +50,8 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # слушатель кнопки
         self.excel_but.clicked.connect(self.export_to_excel)
+        # слушатель клика таблицы
+        self.table_view.clicked.connect(self.table_clicked)
 
         # TODO вывод в иксель даті в правильном формате
 
@@ -152,6 +154,21 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
                 data = data.toString('dd.MMM.yyyy')
             row.append(data)
         return row
+
+    def table_clicked(self):
+        row, column = None, None
+        # код который определяет на кукую строку был сделан клик
+        for idx in self.table_view.selectionModel().selectedIndexes():
+            row = idx.row()
+            column = idx.column()
+
+        # сохраняем ID выбранного поля
+        self.choice = self.table_view.model().index(row, 0).data()  # выбранный ID при дабл клике
+        print(self.choice)
+
+    def mousePressEvent(self,event):
+        print("OK!!")
+        super().mousePressEvent(event)
 
 
 class DateFormatDelegate(QtWidgets.QStyledItemDelegate):

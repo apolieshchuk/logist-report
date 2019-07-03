@@ -42,10 +42,7 @@ def table_size(table_view):
 def create_table_model(DB,table):
 
     # создаем модель таблицы
-    if table == 'auto':
-        table_model = MySqlTableModel(None, DB)
-    else:
-        table_model = QtSql.QSqlTableModel(None, DB)
+    table_model = MySqlTableModel(None, DB, table)
     table_model.setTable(table)
     table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
     table_model.select()
@@ -63,14 +60,15 @@ def create_table_model(DB,table):
 class MySqlTableModel(QtSql.QSqlTableModel):
 
     def __init__(self, *args, **kwargs):
-        QtSql.QSqlTableModel.__init__(self, *args, **kwargs)
+        QtSql.QSqlTableModel.__init__(self, args[0], args[1])
+        self.table = args[2] # таблица с которой будем работать
         self.checkeable_data = {}
 
     def flags(self, index):
-        # TODO ПОле фамилии -надо едитебл
-        if index.column() == COLUMNS_AUTO.index("v") or \
-                index.column() == COLUMNS_AUTO.index("v2"):
-            return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
+        if self.table == 'auto':
+            if index.column() == COLUMNS_AUTO.index("v") or \
+                    index.column() == COLUMNS_AUTO.index("v2"):
+                return QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled
         return QtSql.QSqlTableModel.flags(self, index)
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
@@ -91,3 +89,4 @@ class MySqlTableModel(QtSql.QSqlTableModel):
             self.dataChanged.emit(index, index, (role,))
             return True
         return QtSql.QSqlTableModel.setData(self, index, value, role)
+
