@@ -40,6 +40,11 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # создаем фильтр боксы
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)
 
+        # сортировка таблицы
+        # self.table_model.setSort(1,QtCore.Qt.DescendingOrder)
+        # self.table_model.setSort(3, QtCore.Qt.DescendingOrder)
+        # self.table_model.select()
+
         # двигаем колонки на фильтрах и в основной табилце
         # self.move_view_columns(self.table_view,self.filter_box.filter_view)
 
@@ -61,9 +66,9 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
         # включаем сортировку
-        # TODO сортировка по дате + ID
-        self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
+        # Недостаток - только по одной колонке
         # self.table_view.sortByColumn(COLUMNS_REPORT.index("Дата"), QtCore.Qt.DescendingOrder)
+
 
         # Форматируем вывод даты на экран отчета
         # self.table_view.setItemDelegateForColumn(COLUMNS_REPORT.index("Дата"),
@@ -74,10 +79,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Тел"), 95)
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Перевозчик"), 200)
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Маршрут"), 240)
-        # self.table_view.resizeRowsToContents()
-
-        # TODO почему автоматом не расширяет?
-        # self.table_view.setColumnWidth(COLUMNS_REPORT.index("Дата"), 90)
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("Примітка"), 180)
 
         # Расширяем окно, согласно длинны таблицы
         table_width = table_size(self.table_view)
@@ -97,8 +99,10 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.date1 = self.dateEdit.date().toString("yyyy-MM-dd")
         self.date2 = self.dateEdit_2.date().toString("yyyy-MM-dd")
 
-        # ФИЛЬТРАЦИЯ МОДЕЛИ!
-        self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}'")
+        # ФИЛЬТРАЦИЯ И СОРТИРОВКА МОДЕЛИ!
+        self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}' "
+                                   f" ORDER BY route_date DESC, id DESC")
+
         # self.table_view.resizeRowsToContents()
 
     def export_to_excel(self):
