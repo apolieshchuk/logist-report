@@ -23,6 +23,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # from my_sql import My_Sql
         global DB
         DB = My_Sql().DB
+
+        # TODO Срочно сделать експорт в CSV
         # ПЕРЕНОС С SQLITE В MYSQL
         # My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
 

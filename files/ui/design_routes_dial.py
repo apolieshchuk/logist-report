@@ -19,6 +19,7 @@ class Ui_Dialog(object):
         self.filter_view = QtWidgets.QTableView(Dialog)
         self.filter_view.setMinimumSize(QtCore.QSize(0, 0))
         self.filter_view.setMaximumSize(QtCore.QSize(16777215, 23))
+        self.filter_view.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.filter_view.setObjectName("filter_view")
         self.verticalLayout.addWidget(self.filter_view)
         self.table_view = QtWidgets.QTableView(Dialog)

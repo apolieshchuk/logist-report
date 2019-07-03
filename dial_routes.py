@@ -19,7 +19,7 @@ class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
         from window_main import DB
         self.table_model = create_table_model(DB,'routes')
         self.create_table_view()
-        self.filter_box = FilterBoxes(self.filter_view, self.table_view)
+        self.filter_box = FilterBoxes(self.filter_view, self.table_view, 1) # фокусим для ввода
         self.table_view.doubleClicked.connect(self.double_clicked)  # слушаем дабл клик
         self.add_route_but.clicked.connect(self.add_route)  # слушаем кнопку добавить маршрут
 

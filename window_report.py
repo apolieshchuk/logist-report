@@ -50,13 +50,19 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # слушатель кнопки
         self.excel_but.clicked.connect(self.export_to_excel)
-        # слушатель клика таблицы
-        self.table_view.clicked.connect(self.table_clicked)
 
         # TODO вывод в иксель даті в правильном формате
 
     def create_table_view(self):
-        # ------------- ВИЗУАЛИЗАЦИЯ---------------------
+
+        # Закрываем созданый в конструкторе класс и создаем вместо него другой
+        self.table_view.close()
+
+        self.table_view = MyTableView(self.centralwidget)
+        self.table_view.setSortingEnabled(False)
+        self.table_view.setObjectName("table_view")
+        self.verticalLayout_2.addWidget(self.table_view)
+
 
         # вставляем модель в tableview
         self.table_view.setModel(self.table_model)
@@ -87,15 +93,6 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         table_width = table_size(self.table_view)
         # устанавливаем ширину окна
         self.setFixedWidth(table_width)
-
-    def move_view_columns(self, *views):
-        pass
-        # # TODO автоматическое подтягивание индекса колонки с SQL
-        # for el in views:
-        #     el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Менеджер"), 2)
-        #     el.horizontalHeader().moveSection(COLUMNS_REPORT.index("гос.№"), 5)
-        #     el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Культура"), 3)
-        #     el.horizontalHeader().moveSection(COLUMNS_REPORT.index("Тел"), 8)
 
     def start_date_edit(self):
         self.date1 = self.dateEdit.date().toString("yyyy-MM-dd")
@@ -155,21 +152,6 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
             row.append(data)
         return row
 
-    def table_clicked(self):
-        row, column = None, None
-        # код который определяет на кукую строку был сделан клик
-        for idx in self.table_view.selectionModel().selectedIndexes():
-            row = idx.row()
-            column = idx.column()
-
-        # сохраняем ID выбранного поля
-        self.choice = self.table_view.model().index(row, 0).data()  # выбранный ID при дабл клике
-        print(self.choice)
-
-    def mousePressEvent(self,event):
-        print("OK!!")
-        super().mousePressEvent(event)
-
 
 class DateFormatDelegate(QtWidgets.QStyledItemDelegate):
 
@@ -180,3 +162,26 @@ class DateFormatDelegate(QtWidgets.QStyledItemDelegate):
     def displayText(self, value, locale):
         date = QtCore.QDate().fromString(value, 'yyyy-MM-dd')
         return date.toString(self.date_format)
+
+
+        # переписываем клик ивент
+class MyTableView(QtWidgets.QTableView):
+    def __init__(self,*args):
+        super().__init__(*args)
+
+    def contextMenuEvent(self, event):
+        menu = QtWidgets.QMenu(self)
+        delAction = menu.addAction("Удалить")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        if action == delAction:
+            id = self.id_clicked(event)
+            from window_main import DB
+            DB.exec(f"DELETE FROM reptable WHERE id = {id};")
+
+    def id_clicked(self,event):
+        pos = event.pos()
+        ind = self.indexAt(pos)
+        row = ind.row()
+        # сохраняем ID выбранного поля
+        id = self.model().index(row, 0).data()  # выбранный ID при дабл клике
+        return id

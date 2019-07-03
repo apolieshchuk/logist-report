@@ -5,7 +5,7 @@ DEBUG = True
 
 class FilterBoxes(QtWidgets.QMainWindow):
 
-    def __init__(self, filter_view, table_view):
+    def __init__(self, filter_view, table_view, focused_box = -1):
         # from my_sql import My_Sql
         # self.DB = My_Sql.connect_db(str(self))
 
@@ -15,7 +15,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         self.table_view = table_view  # tableView по которому делаем фильтр
         self.origin_table_model = table_view.model()  # таблица по которой делаем фильтр
         self.create_filter_model()
-        self.create_filter_view()
+        self.create_filter_view(focused_box)
         self.sql_table_header = self.get_sql_table_header()
         self.last_filter = ""
         # TODO фильтры выбора
@@ -36,7 +36,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # создаем рядок со сзначений StandartItemModel
         self.filter_model.appendRow([QtGui.QStandardItem(0) for _ in range(self.origin_table_model.columnCount())])
 
-    def create_filter_view(self):
+    def create_filter_view(self,focused_box):
         # вставляем модель в tableview
         self.filter_view.setModel(self.filter_model)
 
@@ -55,6 +55,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # поля инпута(фильтры)
         for col in range(self.filter_model.columnCount()):  # bc checkbox "CHECKBOX_INDEX" col
             filter_text = MyLineEdit(self.table_view.window(), 0, col)
+
             filter_text.setMinimumWidth(1) # для чекбокса поля CHk
             # добавляем его в таблицу
             self.filter_view.setIndexWidget(self.filter_model.index(0, col), filter_text)
@@ -62,6 +63,11 @@ class FilterBoxes(QtWidgets.QMainWindow):
             filter_text.filter_default_viewset(self.table_view)
             # включаем слушатель изменения текста
             filter_text.textEdited.connect(self.filter_text_edited)
+
+            # автофокус в диалоге
+            if col == focused_box:
+                filter_text.setFocusPolicy(QtCore.Qt.StrongFocus)
+                filter_text.setFocus()
 
     def copy_view_settings(self, giver_view, taker_view):
 

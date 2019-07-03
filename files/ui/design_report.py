@@ -49,6 +49,7 @@ class Ui_ReportWindow(object):
         self.filter_view.setObjectName("filter_view")
         self.verticalLayout_2.addWidget(self.filter_view)
         self.table_view = QtWidgets.QTableView(self.centralwidget)
+        self.table_view.setSortingEnabled(False)
         self.table_view.setObjectName("table_view")
         self.verticalLayout_2.addWidget(self.table_view)
         ReportWindow.setCentralWidget(self.centralwidget)
