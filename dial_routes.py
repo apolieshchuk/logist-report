@@ -16,8 +16,8 @@ class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
 
         super().__init__()
         self.setupUi(self)
-        from window_main import DB
-        self.table_model = create_table_model(DB,'routes')
+        from window_main import mysql
+        self.table_model = create_table_model(mysql.DB,'routes')
         self.create_table_view()
         self.filter_box = FilterBoxes(self.filter_view, self.table_view, 1) # фокусим для ввода
         self.table_view.doubleClicked.connect(self.double_clicked)  # слушаем дабл клик
@@ -68,9 +68,9 @@ class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
 
         txt = self.line_edit.text()
         if re.match(r".*-.*",txt): # если вводимый текст совпадает формату ".... - ...."
-            from window_main import DB
-            DB.exec(f"""INSERT INTO routes(route) VALUES ('{txt}')""")
-            DB.commit()
+            from window_main import mysql
+            mysql.DB.exec(f"""INSERT INTO routes(route) VALUES ('{txt}')""")
+            mysql.DB.commit()
             self.table_model.select()
 
     def csv_to_sql(self, path):

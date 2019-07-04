@@ -1,6 +1,6 @@
 import csv
 import threading
-
+from datetime import date
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtSql import *
 
@@ -171,3 +171,55 @@ class My_Sql():
         sql = f"UPDATE auto SET chk = ''"
         db.exec(sql)
         db.commit()
+
+    def backup (self):
+        today = date.today()
+        with open("files/sql/backup/lastBackup.txt") as file:
+            print("Today's date:", today)
+            lastBackup = file.readline().rstrip()
+            if str(today) != lastBackup:
+                print('Need backup!')
+                self.db_to_csv()
+                file.close()
+                with open("files/sql/backup/lastBackup.txt", 'w') as file:
+                    file.write(str(today))
+
+
+
+
+    def db_to_csv(self):
+        # получаем перечень таблиц в БД
+        sql = self.DB.exec("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'")
+        tables = []
+        while sql.next():
+            tables.append(sql.value(2))
+
+        # Копируем каждую таблицу
+        for table in tables:
+            sql = self.DB.exec(f"SELECT * FROM {table}")
+            with open(f"files\sql\\backup\{table}.csv", "w",newline="",
+                      encoding='UTF-8') as csv_file:
+                # Записываем шапку в файл
+                csv_writer = csv.writer(csv_file)
+                csv_writer.writerow(self.getHeader_sql(table))
+
+                # Записываем таблицу в файл
+                while sql.next():
+                    csv_writer.writerow(self.getRow_fromSQL(sql))
+
+
+    def getRow_fromSQL(self,sql):
+        row = []
+        columns = sql.record().count()
+        for col in range(columns):
+            row.append(sql.value(col))
+        return row
+
+
+    def getHeader_sql(self,table):
+        sql = self.DB.exec(f"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}'")
+        header = []
+        while sql.next():
+            header.append(sql.value(3))
+        return header
+

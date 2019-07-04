@@ -21,8 +21,8 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.setWindowTitle("Отчет")
 
         # Создаем таблицу
-        from window_main import DB
-        self.table_model = create_table_model(DB, 'reptable')
+        from window_main import mysql
+        self.table_model = create_table_model(mysql.DB, 'reptable')
         self.create_table_view()
 
         # TODO вынести в функцию
@@ -175,8 +175,9 @@ class MyTableView(QtWidgets.QTableView):
         action = menu.exec_(self.mapToGlobal(event.pos()))
         if action == delAction:
             id = self.id_clicked(event)
-            from window_main import DB
-            DB.exec(f"DELETE FROM reptable WHERE id = {id};")
+            from window_main import mysql
+            mysql.DB.exec(f"DELETE FROM reptable WHERE id = {id};")
+            self.model().select()
 
     def id_clicked(self,event):
         pos = event.pos()

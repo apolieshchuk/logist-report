@@ -57,8 +57,8 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         for id in self.id_set:
             # формируем sql запрос
 
-            from window_main import DB
-            sql = DB.exec(f"SELECT * FROM auto WHERE id = {id}")
+            from window_main import mysql
+            sql = mysql.DB.exec(f"SELECT * FROM auto WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
             sql.next()
 
@@ -126,8 +126,8 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
     def most_used_on_route(self, item, limit=18446744073709551615):
 
         # limit - количество ПОСЛЕДНИХ по ID записей
-        from window_main import DB
-        sql = DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
+        from window_main import mysql
+        sql = mysql.DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
                            f" ORDER BY id DESC LIMIT {limit} ")
         dict = {}
         while sql.next():

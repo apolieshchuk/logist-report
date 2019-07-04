@@ -16,21 +16,12 @@ class FilterBoxes(QtWidgets.QMainWindow):
         self.origin_table_model = table_view.model()  # таблица по которой делаем фильтр
         self.create_filter_model()
         self.create_filter_view(focused_box)
-        self.sql_table_header = self.get_sql_table_header()
+        from window_main import mysql
+        table = self.origin_table_model.tableName()
+        self.sql_table_header = mysql.getHeader_sql(table)
+        # print(self.sql_table_header)
         self.last_filter = ""
         # TODO фильтры выбора
-
-    def get_sql_table_header(self):
-
-        # Берем шапку с используемой таблицы
-        table = self.origin_table_model.tableName()
-        from window_main import DB
-        sql = DB.exec(f"SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table}'")
-        header = []
-        while sql.next():
-            header.append(sql.value(3))
-        if DEBUG: print("Header in filtered table -", header)
-        return header
 
     def create_filter_model(self):
         # создаем рядок со сзначений StandartItemModel

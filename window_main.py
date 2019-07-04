@@ -14,17 +14,19 @@ from static import *
 
 from files.ui import design
 
-DB = None
+mysql = None
 
 class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
     def __init__(self):
         # DB = My_Sql.connect_db("Auto connect")
         # from my_sql import My_Sql
-        global DB
-        DB = My_Sql().DB
+        global mysql
+        mysql = My_Sql()
+        # global DB
+        # DB = mysql.DB
 
-        # TODO Срочно сделать експорт в CSV
+        mysql.backup()
         # ПЕРЕНОС С SQLITE В MYSQL
         # My_Sql.sqlite_to_mysql(DB,"files/sql/auto.db")
 
@@ -47,7 +49,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
         # меняем титл окна
         self.setWindowTitle("База авто")
-        self.table_model = create_table_model(DB,'auto')  # Функция которая вносит базу данных в QStandartItemModel
+        self.table_model = create_table_model(mysql.DB,'auto')  # Функция которая вносит базу данных в QStandartItemModel
         self.create_table_view()  # Создаем обзорную модель(QTableView) на основании TableModel
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)  # создаем фильтр-боксы
 
@@ -178,7 +180,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         c = 1
         for id in self.get_checked_ids():
             # формируем sql запрос
-            sql = DB.exec(f"SELECT * FROM auto WHERE id = {id}")
+            sql = mysql.DB.exec(f"SELECT * FROM auto WHERE id = {id}")
             # берем первый (и единственный) вывод с sql
             sql.next()
             # формируем колонки которые заданы шаблоном
@@ -198,7 +200,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # При нажатие ОК на диалоге вытаскивает введенные значения и вставляет в таблицу
         # Обязательно заполнение поля CHK!
         if self.dialog.exec_():
-            DB.exec(f"""INSERT INTO auto(name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
+            mysql.DB.exec(f"""INSERT INTO auto(name,code,mark,auto_num,trail_num,dr_surn,dr_name,dr_fath,tel,notes) VALUES (
                               '{self.dialog.line_carrier.text()}',
                               '{self.dialog.line_kod.text()}',
                               '{self.dialog.line_mark.text()}',
@@ -210,7 +212,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                               '{self.dialog.line_tel.text()}',
                               '{self.dialog.line_note.text()}'
                           )""")
-            DB.commit()
+            mysql.DB.commit()
 
             self.table_model.select()
             # self.table_view.setModel(self.table_model)
@@ -268,7 +270,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                         # 0-date, 1-manager, 2-rout, 3-crop, 4-carrier, 5-auto_num, 6-dr_surn
                         # 7-tel 8- f2, 9-f1, 10-tr,
 
-                        DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,tel,f2,f1,tr,notes) VALUES (
+                        mysql.DB.exec(f"""INSERT INTO reptable(route_date,manager,route,crop,carrier,auto_num,dr_surn,tel,f2,f1,tr,notes) VALUES (
                                           '{el[0]}',
                                           '{el[1]}',
                                           '{el[2]}',
@@ -282,7 +284,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
                                           '{el[10]}',
                                           '{el[11]}'
                                       )""")
-                        DB.commit()
+                        mysql.DB.commit()
                     self.clear_check_and_filters()
 
     def do_report(self):
@@ -310,7 +312,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
     def reconnect_to_mysql(self):
         if self.stopThread: return
         threading.Timer(55.0, self.reconnect_to_mysql).start()
-        DB.exec("SELECT id FROM auto WHERE id = 1")
+        mysql.DB.exec("SELECT id FROM auto WHERE id = 1")
         if DEBUG: print(f"DB reconnected!")
 
     def get_checked_ids(self):
