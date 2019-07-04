@@ -184,9 +184,6 @@ class My_Sql():
                 with open("files/sql/backup/lastBackup.txt", 'w') as file:
                     file.write(str(today))
 
-
-
-
     def db_to_csv(self):
         # получаем перечень таблиц в БД
         sql = self.DB.exec("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'")
