@@ -111,7 +111,10 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         sheet = wb['Sheet']
 
         # шапка отчета
-        sheet.append(COLUMNS_REPORT[1:])
+        head = COLUMNS_REPORT[1:]
+        # специально для трансформации TODO
+        head[7:7] = ["Ім`я","По-батьк","Посв"]
+        sheet.append(head)
 
         # отчет
         for row in range(self.table_view.model().rowCount()):
@@ -150,6 +153,15 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
             if type(data).__name__ == 'QDate':
                 data = data.toString('dd.MMM.yyyy')
             row.append(data)
+
+        # специально для трансформации TODO
+        auto_num = self.table_view.model().index(row_num, COLUMNS_REPORT.index("гос.№")).data()
+        dr_surn = self.table_view.model().index(row_num, COLUMNS_REPORT.index("Водитель")).data()
+        from window_main import mysql
+        sql = mysql.DB.exec(f"SELECT dr_name,dr_fath, notes FROM auto"
+                            f" WHERE auto_num='{auto_num}' AND dr_surn = '{dr_surn}'")
+        sql.next()
+        row[7:7] = [sql.value(i)for i in range(3)]
         return row
 
 
