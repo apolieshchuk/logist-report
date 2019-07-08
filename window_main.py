@@ -169,6 +169,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             widg = self.filter_box.filter_view.indexWidget(index)  # Берём Widget из QModelIndex
             widg.filter_default_viewset(self.table_view)
 
+        # self.table_model.setFilter("")
         # пересоздаем окно и обнуляем список выделения
         self.table_model.select()
         # TODO Долго ресайзит роус ту контентс

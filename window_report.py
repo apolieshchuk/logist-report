@@ -48,8 +48,9 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # двигаем колонки на фильтрах и в основной табилце
         # self.move_view_columns(self.table_view,self.filter_box.filter_view)
 
-        # слушатель кнопки
+        # слушатель кнопок
         self.excel_but.clicked.connect(self.export_to_excel)
+        self.autoInDay_but.clicked.connect(self.autoInDay_report)
 
         # TODO вывод в иксель даті в правильном формате
 
@@ -102,7 +103,29 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}' "
                                    f" ORDER BY route_date DESC, id DESC")
 
-        # self.table_view.resizeRowsToContents()
+        # self.table_view.resizeRowsToContents()э
+
+    def autoInDay_report(self):
+
+        while self.table_view.model().canFetchMore():
+            self.table_view.model().fetchMore()
+
+        rows = self.table_view.model().rowCount()
+        d = dict()
+        col = COLUMNS_REPORT.index('Маршрут')
+        for row in range(rows):
+            route = self.table_view.model().index(row, col).data()
+            if route in d:
+                d[route] += 1
+            else:
+                d[route] = 1
+        msgBox = QtWidgets.QMessageBox()
+        s = ''
+        for k,v in d.items():
+            temp = f'{k}: {v} авто \n'
+            s += temp
+        msgBox.setText(s)
+        msgBox.exec()
 
     def export_to_excel(self):
         # create blank Workbook
@@ -189,7 +212,12 @@ class MyTableView(QtWidgets.QTableView):
             id = self.id_clicked(event)
             from window_main import mysql
             mysql.DB.exec(f"DELETE FROM reptable WHERE id = {id};")
-            self.model().select()
+            # self.setModel(self.model())
+            try:
+                # TODO в случае фильтрации - еррор
+                self.model().select() # при фильтрации еррор?
+            except:
+                pass
 
     def id_clicked(self,event):
         pos = event.pos()
