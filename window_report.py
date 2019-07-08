@@ -107,8 +107,12 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
     def autoInDay_report(self):
 
-        while self.table_view.model().canFetchMore():
-            self.table_view.model().fetchMore()
+        # TODO ошибка в случае если таблица уже отфильртована
+        try:
+            while self.table_view.model().canFetchMore():
+                self.table_view.model().fetchMore()
+        except:
+            pass
 
         rows = self.table_view.model().rowCount()
         d = dict()

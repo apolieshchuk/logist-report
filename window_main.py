@@ -190,7 +190,11 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             c += 1
 
         if len(info) == 2: # если заданны дополнительные данные
-            info_str = f"{info[0]} {info[1]}" + "\n"
+            # конвертируем дату
+            qdate = QtCore.QDate().fromString(info[0],"yyyy-MM-dd")
+            date = qdate.toString('dd/MMM/yyyy')
+
+            info_str = f"{date} {info[1]}" + "\n"
             buf = info_str + buf
 
         pyperclip.copy(buf)
