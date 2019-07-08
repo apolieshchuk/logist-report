@@ -94,24 +94,26 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         text_inputs.append(COLUMNS_ROUTE_INFO.index("Прим."))
         for col in text_inputs:  # bc checkbox "CHECKBOX_INDEX" col
             for row in range(self.table_model.rowCount()):
+                curId = list(self.id_set)[row]
                 inp_text = MyLineEdit(self, row, col)
                 inp_text.setFixedWidth(self.table_view.columnWidth(col))
                 inp_text.setFixedHeight(self.table_view.rowHeight(row))
                 if col == COLUMNS_ROUTE_INFO.index("ф1"):
-                    inp_text.setText(str(self.most_used_on_route('f1', 5)))
+                    inp_text.setText(str(self.most_used_on_route('f1',curId,5)))
                 elif col == COLUMNS_ROUTE_INFO.index("ф2"):
-                    inp_text.setText(str(self.most_used_on_route('f2', 5)))
+                    inp_text.setText(str(self.most_used_on_route('f2',curId,5)))
                 # добавляем его в таблицу
                 self.table_view.setIndexWidget(self.table_model.index(row, col), inp_text)
 
         # лист
         col = COLUMNS_ROUTE_INFO.index("ТР")
         for row in range(self.table_model.rowCount()):
+            curId = list(self.id_set)[row]
             lst_widg = QtWidgets.QComboBox()
             lst_widg.addItem("НІ")
             lst_widg.addItem("ТАК")
             # устанавливаем значение трансформации на маршруте
-            tr = self.most_used_on_route("tr", 10)
+            tr = self.most_used_on_route("tr",curId,10)
             ind = lst_widg.findText(tr)
             if ind != -1:
                 lst_widg.setCurrentIndex(ind)
@@ -123,25 +125,38 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
-    def most_used_on_route(self, item, limit=18446744073709551615):
+    def most_used_on_route(self, item,id = -1,limit=18446744073709551615):
+        from window_main import mysql
+
+        # подбирает нужны показатели не только по маршруту но и по перевозчику
+        strCar = ""
+        if id != -1:
+            sql =  mysql.DB.exec(f'SELECT name FROM auto WHERE id = {id}')
+            sql.next()
+            carrier = sql.value('name')
+            strCar = f"AND carrier = '{carrier}'"
 
         # limit - количество ПОСЛЕДНИХ по ID записей
-        from window_main import mysql
         sql = mysql.DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
+                            +strCar+
                            f" ORDER BY id DESC LIMIT {limit} ")
-        dict = {}
+
+        # TODO ЕСЛИ ПЕРЕВОЗЧИК НИ РАЗУ НЕ БЫЛ НА МАРШРУТЕ?!
+
+        d = {}
         while sql.next():
             val = sql.value(item)
-            if dict.get(val):
-                dict[val] += 1
+            if d.get(val):
+                d[val] += 1
             else:
-                dict[val] = 1
-        sorted_dict = sorted(dict.items(), key=operator.itemgetter(1), reverse=True)
+                d[val] = 1
+
+        # сортируем созданный словарь и берем самое большое значение
+        sorted_dict = sorted(d.items(), key=operator.itemgetter(1), reverse=True)
         if DEBUG: print(sorted_dict)
         if len(sorted_dict) > 0:
             return sorted_dict[0][0]
         return ""
-
 
 class MyLineEdit(QtWidgets.QLineEdit):
 

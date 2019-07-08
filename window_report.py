@@ -107,7 +107,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
     def autoInDay_report(self):
 
-        # TODO ошибка в случае если таблица уже отфильртована
+        # TODO ошибка в случае если таблица уже отфильртована (QSortFilterModel)
         try:
             while self.table_view.model().canFetchMore():
                 self.table_view.model().fetchMore()
