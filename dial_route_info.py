@@ -141,15 +141,14 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                             +strCar+
                            f" ORDER BY id DESC LIMIT {limit} ")
 
-        # TODO ЕСЛИ ПЕРЕВОЗЧИК НИ РАЗУ НЕ БЫЛ НА МАРШРУТЕ?!
+        # TODO Упростить првоерку?
 
-        d = {}
-        while sql.next():
-            val = sql.value(item)
-            if d.get(val):
-                d[val] += 1
-            else:
-                d[val] = 1
+        d = self.createDict(sql,item)
+        if not d:
+            sql = mysql.DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
+                                f" ORDER BY id DESC LIMIT {limit} ")
+            d = self.createDict(sql,item)
+
 
         # сортируем созданный словарь и берем самое большое значение
         sorted_dict = sorted(d.items(), key=operator.itemgetter(1), reverse=True)
@@ -157,6 +156,16 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
         if len(sorted_dict) > 0:
             return sorted_dict[0][0]
         return ""
+
+    def createDict(self,sql,item):
+        d = {}
+        while sql.next():
+            val = sql.value(item)
+            if d.get(val):
+                d[val] += 1
+            else:
+                d[val] = 1
+        return d
 
 class MyLineEdit(QtWidgets.QLineEdit):
 
