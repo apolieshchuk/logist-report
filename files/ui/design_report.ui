@@ -25,11 +25,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="autoInDay_but">
-        <property name="text">
-         <string>Авто за период</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QPushButton" name="autoToday_but">
+          <property name="text">
+           <string>Авто сегодня</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="autoInTime_but">
+          <property name="text">
+           <string>Авто за период</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <spacer name="horizontalSpacer">

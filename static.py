@@ -90,3 +90,10 @@ class MySqlTableModel(QtSql.QSqlTableModel):
             return True
         return QtSql.QSqlTableModel.setData(self, index, value, role)
 
+    def fetchTable(self):
+        try:
+            while self.canFetchMore():
+                self.fetchMore()
+        except:
+            pass
+

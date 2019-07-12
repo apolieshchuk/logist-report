@@ -20,11 +20,6 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # меняем титл окна
         self.setWindowTitle("Отчет")
 
-        # Создаем таблицу
-        from window_main import mysql
-        self.table_model = create_table_model(mysql.DB, 'reptable')
-        self.create_table_view()
-
         # TODO вынести в функцию
         # устанавливаем диапазон дат по умолчанию
         date1 = QtCore.QDate.currentDate().addMonths(-6)
@@ -34,11 +29,15 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # слушатели диапазона дат
         self.dateEdit.dateChanged.connect(self.start_date_edit)
         self.dateEdit_2.dateChanged.connect(self.start_date_edit)
-        # фильтруем по установленному диапазону дат
-        self.start_date_edit()
+
+        # Создаем таблицу
+        from window_main import mysql
+        self.table_model = create_table_model(mysql.DB, 'reptable')
+        self.create_table_view()
 
         # создаем фильтр боксы
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)
+        self.table_view.setFilterBox(self.filter_box)
 
         # сортировка таблицы
         # self.table_model.setSort(1,QtCore.Qt.DescendingOrder)
@@ -50,7 +49,8 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # слушатель кнопок
         self.excel_but.clicked.connect(self.export_to_excel)
-        self.autoInDay_but.clicked.connect(self.autoInDay_report)
+        self.autoInTime_but.clicked.connect(self.autoInTime_report)
+        self.autoToday_but.clicked.connect(lambda : self.autoInTime_report(True))
 
         # TODO вывод в иксель даті в правильном формате
 
@@ -63,7 +63,6 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.table_view.setSortingEnabled(False)
         self.table_view.setObjectName("table_view")
         self.verticalLayout_2.addWidget(self.table_view)
-
 
         # вставляем модель в tableview
         self.table_view.setModel(self.table_model)
@@ -95,9 +94,13 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         # устанавливаем ширину окна
         self.setFixedWidth(table_width)
 
+        # фильтруем по установленному диапазону дат
+        self.start_date_edit()
+
     def start_date_edit(self):
         self.date1 = self.dateEdit.date().toString("yyyy-MM-dd")
         self.date2 = self.dateEdit_2.date().toString("yyyy-MM-dd")
+
 
         # ФИЛЬТРАЦИЯ И СОРТИРОВКА МОДЕЛИ!
         self.table_model.setFilter(f"route_date BETWEEN '{self.date1}' AND '{self.date2}' "
@@ -105,29 +108,49 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # self.table_view.resizeRowsToContents()э
 
-    def autoInDay_report(self):
+    def autoInTime_report(self,today = False):
+
+        if today:
+            # Создаем модель для фильтрации по сегодняшнему дню
+            model = QtCore.QSortFilterProxyModel()
+            model.setFilterKeyColumn(COLUMNS_REPORT.index("Дата"))
+            model.setSourceModel(self.table_model)  # что фильтруем?
+            today = QtCore.QDate.currentDate().toString("yyyy-MM-dd")
+            model.setFilterRegExp(f"{today}")
+        else:
+            model = self.table_view.model()
 
         # TODO ошибка в случае если таблица уже отфильртована (QSortFilterModel)
         try:
-            while self.table_view.model().canFetchMore():
-                self.table_view.model().fetchMore()
+            while model.canFetchMore():
+                model.fetchMore()
         except:
             pass
 
-        rows = self.table_view.model().rowCount()
+        # считаем авто на загрузках
+        rows = model.rowCount()
         d = dict()
         col = COLUMNS_REPORT.index('Маршрут')
         for row in range(rows):
-            route = self.table_view.model().index(row, col).data()
+            route = model.index(row, col).data()
             if route in d:
                 d[route] += 1
             else:
                 d[route] = 1
         msgBox = QtWidgets.QMessageBox()
+
         s = ''
+        # Основное поле сообщения
+        summy = 0
         for k,v in d.items():
             temp = f'{k}: {v} авто \n'
             s += temp
+            summy += v
+
+        # Итог
+        s += '\n'
+        s += f"Всего: {summy}"
+
         msgBox.setText(s)
         msgBox.exec()
 
@@ -206,6 +229,7 @@ class DateFormatDelegate(QtWidgets.QStyledItemDelegate):
         # переписываем клик ивент
 class MyTableView(QtWidgets.QTableView):
     def __init__(self,*args):
+        self.filter_box = None
         super().__init__(*args)
 
     def contextMenuEvent(self, event):
@@ -216,12 +240,19 @@ class MyTableView(QtWidgets.QTableView):
             id = self.id_clicked(event)
             from window_main import mysql
             mysql.DB.exec(f"DELETE FROM reptable WHERE id = {id};")
-            # self.setModel(self.model())
+            # TODO в случае фильтрации - еррор
+            # self.model().select()  # при фильтрации еррор?
             try:
                 # TODO в случае фильтрации - еррор
                 self.model().select() # при фильтрации еррор?
             except:
-                pass
+                # в случае с фильтром - добираемся до самой глубокой модели MySQLTable
+                rootModel = self.model().sourceModel()
+                while type(rootModel).__name__ != 'MySqlTableModel':
+                    rootModel = rootModel.sourceModel()
+                rootModel.select()
+                self.setModel(rootModel)
+                self.filter_box.clearFilters()
 
     def id_clicked(self,event):
         pos = event.pos()
@@ -230,3 +261,6 @@ class MyTableView(QtWidgets.QTableView):
         # сохраняем ID выбранного поля
         id = self.model().index(row, 0).data()  # выбранный ID при дабл клике
         return id
+
+    def setFilterBox(self,filter_box):
+        self.filter_box = filter_box

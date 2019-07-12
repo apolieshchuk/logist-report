@@ -142,13 +142,12 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                            f" ORDER BY id DESC LIMIT {limit} ")
 
         # TODO Упростить првоерку?
-
+        # Если перевозчик не был на маршруте - используем тариф любых последних
         d = self.createDict(sql,item)
         if not d:
             sql = mysql.DB.exec(f"SELECT {item} FROM reptable WHERE route = '{self.route}'"
                                 f" ORDER BY id DESC LIMIT {limit} ")
             d = self.createDict(sql,item)
-
 
         # сортируем созданный словарь и берем самое большое значение
         sorted_dict = sorted(d.items(), key=operator.itemgetter(1), reverse=True)

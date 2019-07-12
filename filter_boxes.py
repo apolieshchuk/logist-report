@@ -84,8 +84,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         model_for_filter = self.origin_table_model
         if self.last_filter in text:
             # прокручиваем к низу все данные в модели
-            while model_for_filter.canFetchMore():
-                model_for_filter.fetchMore()
+            model_for_filter.fetchTable()
             model_for_filter = self.table_view.model()
         self.last_filter = text
 
@@ -104,6 +103,15 @@ class FilterBoxes(QtWidgets.QMainWindow):
         proxy_model.setFilterKeyColumn(self.sender().col)
         proxy_model.setSourceModel(model_for_filter)  # что фильтруем?
         self.table_view.setModel(proxy_model)  # Вот вам отфильтрованное
+
+    def clearFilters(self):
+        # убираем фильтр с колонок
+        for col in range(2, self.filter_model.columnCount()):
+            pos = (0, col)
+            item = self.filter_model.item(pos[0], pos[1])  # Берём QStandartItem в tableModel
+            index = self.filter_model.indexFromItem(item)  # Берём QModelIndex в tableModel
+            widg = self.filter_view.indexWidget(index)  # Берём Widget из QModelIndex
+            widg.filter_default_viewset(self.table_view)
 
 
 class MyLineEdit(QtWidgets.QLineEdit):

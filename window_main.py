@@ -162,12 +162,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             self.table_model.checkeable_data[k] = 0
 
         # убираем фильтр с колонок
-        for col in range(2, self.filter_box.filter_model.columnCount()):
-            pos = (0, col)
-            item = self.filter_box.filter_model.item(pos[0], pos[1])  # Берём QStandartItem в tableModel
-            index = self.filter_box.filter_model.indexFromItem(item)  # Берём QModelIndex в tableModel
-            widg = self.filter_box.filter_view.indexWidget(index)  # Берём Widget из QModelIndex
-            widg.filter_default_viewset(self.table_view)
+        self.filter_box.clearFilters()
 
         # self.table_model.setFilter("")
         # пересоздаем окно и обнуляем список выделения
