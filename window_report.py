@@ -1,3 +1,5 @@
+import operator
+
 from PyQt5 import QtWidgets, QtSql, QtCore
 from files.ui import design_report
 from filter_boxes import FilterBoxes
@@ -137,12 +139,14 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
                 d[route] += 1
             else:
                 d[route] = 1
-        msgBox = QtWidgets.QMessageBox()
+
+        # Сортируем словарь
+        sorted_dict = sorted(d.items(), key=operator.itemgetter(0))
 
         s = ''
         # Основное поле сообщения
         summy = 0
-        for k,v in d.items():
+        for k,v in sorted_dict:
             temp = f'{k}: {v} авто \n'
             s += temp
             summy += v
@@ -151,6 +155,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         s += '\n'
         s += f"Всего: {summy}"
 
+        msgBox = QtWidgets.QMessageBox()
         msgBox.setText(s)
         msgBox.exec()
 
