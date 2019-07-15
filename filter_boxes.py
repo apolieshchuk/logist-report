@@ -21,7 +21,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
             pass
 
         self.filter_root = FilterNode(None,table_view.model())
-        self.current_filter_node = self.filter_root
+        # self.current_filter_node = self.filter_root
         # self.active_filters = OrderedDict()  # очередь фильтров
         # self.active_filters['root'] = self.origin_table_model  # корень, основная таблица под фильтрацию
 
@@ -31,7 +31,6 @@ class FilterBoxes(QtWidgets.QMainWindow):
         table = self.origin_table_model.tableName()
         self.sql_table_header = mysql.getHeader_sql(table)
         # print(self.sql_table_header)
-        self.last_filter = ""
         # TODO фильтры выбора
 
     def create_filter_model(self):
@@ -88,36 +87,12 @@ class FilterBoxes(QtWidgets.QMainWindow):
 
     def filter_text_edited(self):
 
-        # Если фильтр ещё неактивен - добавить в очередь активности фильтров
-        if not self.active_filters.get(self.sender()):
-            self.active_filters[self.sender()] = None
-
-        if DEBUG: print("Text change event (filter_text_edited)")
-        text = self.sender().text()
-
-        # TODO Сделать нодами
-        # если текст удаляется - удаляем и фильтр в очереди активности
-        if text == "":
-            ord_list = list(self.active_filters.items())
-            ind = ord_list.index(self.sender())
-
-
-        if len(self.active_filters) > 2:
-            # предпоследний фильтр
-            val = list(self.active_filters.items())[-2][0]
-            # модель предпоследнего фильтра
-            model_for_filter = self.active_filters[val]
-
-        # если текст предыдущего фильтра есть в текущем,
-        # не нужно перебирать всю таблицу снова\
-        if self.last_filter in text:
-            model_for_filter = self.table_view.model()
-        self.last_filter = text
+        node = self.find_filter_node(self.sender())
 
         # # фильтруем модель СПОСОБ №1
         # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
         # self.table_view.resizeRowsToContents()  # расширяем строки по содержимому
-
+        text = self.sender().text()
         # фильтруем модель СПОСОБ №2
         # делаем реджекс выражение
         regex = ""
@@ -127,10 +102,26 @@ class FilterBoxes(QtWidgets.QMainWindow):
         proxy_model = QtCore.QSortFilterProxyModel()
         proxy_model.setFilterRegExp(regex)
         proxy_model.setFilterKeyColumn(self.sender().col)
-        proxy_model.setSourceModel(model_for_filter)  # что фильтруем?
+        proxy_model.setSourceModel(node.model)  # что фильтруем?
         self.table_view.setModel(proxy_model)  # Вот вам отфильтрованное
+        !!
+        if node.last_text in text:
+            node.model = proxy_model
+        else:
+            node.model = self.filter_root.model
+        node.last_text = text
 
-        self.active_filters[self.sender()] = proxy_model
+    def find_filter_node(self,box):
+        cur_node = self.filter_root
+        last_node = None
+        while cur_node:
+            if cur_node.box == box:
+                return cur_node
+            last_node = cur_node
+            cur_node = cur_node.next
+        new_node = FilterNode(box,self.table_view.model())
+        last_node.next = new_node
+        return new_node
 
     def clearFilters(self):
         self.active_filters = []
@@ -179,7 +170,8 @@ class MyLineEdit(QtWidgets.QLineEdit):
 
 class FilterNode():
 
-    def __init__(self,box,model,next_node=None):
-        self.filter_box = box
-        self.filter_model = model
-        self.next_node = next_node
+    def __init__(self,box,model,next=None):
+        self.box = box
+        self.model = model
+        self.last_text = ""
+        self.next = next
