@@ -10,6 +10,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # self.DB = My_Sql.connect_db(str(self))
 
         super().__init__()
+        self.active_filters = []
         self.filter_model = QtGui.QStandardItemModel()  # модель фильтра
         self.filter_view = filter_view  # вид фильтра
         self.table_view = table_view  # tableView по которому делаем фильтр
@@ -76,17 +77,38 @@ class FilterBoxes(QtWidgets.QMainWindow):
         taker_view.verticalHeader().setMaximumWidth(tabl_head_width)
 
     def filter_text_edited(self):
+
         if DEBUG: print("Text change event (filter_text_edited)")
         text = self.sender().text()
 
-        # если текст предыдущего фильтра есть в текущем,
-        # не нужно перебирать всю таблицу снова
+        !!# TODO вынести за функцию
         model_for_filter = self.origin_table_model
+        model_for_filter.fetchTable()
+        if len(self.active_filters) > 1:
+            model_for_filter = self.active_filters[-1][1]
+
+        # если текст предыдущего фильтра есть в текущем,
+        # не нужно перебирать всю таблицу снова\
         if self.last_filter in text:
-            # прокручиваем к низу все данные в модели
-            model_for_filter.fetchTable()
             model_for_filter = self.table_view.model()
         self.last_filter = text
+
+        # if self.last_filter in text:
+        #     if not self.active_filters:
+        #         model_for_filter = self.origin_table_model
+        #     else:
+        #         model_for_filter = self.active_filters[-1][1]
+        # else:
+        #     model_for_filter = self.active_filters[-1][1]
+
+
+        # прокручиваем к низу все данные в модели
+        # try:
+        #     model_for_filter.fetchTable()
+        # except:
+        #     pass
+        # model_for_filter = self.table_view.model()
+
 
         # # фильтруем модель СПОСОБ №1
         # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
@@ -104,7 +126,18 @@ class FilterBoxes(QtWidgets.QMainWindow):
         proxy_model.setSourceModel(model_for_filter)  # что фильтруем?
         self.table_view.setModel(proxy_model)  # Вот вам отфильтрованное
 
+        # анализируем все существующие фильтры
+        find_filter = False
+        for filter in self.active_filters:
+            if filter[0] == self.sender():
+                filter[1] = proxy_model
+                find_filter = True
+        # если ещё нет фильтра на колонке - добавляем
+        if not find_filter: self.active_filters.append([self.sender(), proxy_model])
+
+
     def clearFilters(self):
+        self.active_filters = []
         # убираем фильтр с колонок
         for col in range(2, self.filter_model.columnCount()):
             pos = (0, col)
