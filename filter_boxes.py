@@ -82,6 +82,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         text = self.sender().text()
 
         !!#
+        
         # TODO вынести за функцию
         model_for_filter = self.origin_table_model
         model_for_filter.fetchTable()
