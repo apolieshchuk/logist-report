@@ -1,20 +1,30 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
+from collections import OrderedDict
 
 DEBUG = True
 
 
 class FilterBoxes(QtWidgets.QMainWindow):
 
-    def __init__(self, filter_view, table_view, focused_box = -1):
+    def __init__(self, filter_view, table_view, focused_box=-1):
         # from my_sql import My_Sql
         # self.DB = My_Sql.connect_db(str(self))
 
         super().__init__()
-        self.active_filters = []
         self.filter_model = QtGui.QStandardItemModel()  # модель фильтра
         self.filter_view = filter_view  # вид фильтра
         self.table_view = table_view  # tableView по которому делаем фильтр
         self.origin_table_model = table_view.model()  # таблица по которой делаем фильтр
+        try:
+            self.origin_table_model.fetchTable()
+        except:
+            pass
+
+        self.filter_root = FilterNode(None,table_view.model())
+        self.current_filter_node = self.filter_root
+        # self.active_filters = OrderedDict()  # очередь фильтров
+        # self.active_filters['root'] = self.origin_table_model  # корень, основная таблица под фильтрацию
+
         self.create_filter_model()
         self.create_filter_view(focused_box)
         from window_main import mysql
@@ -28,7 +38,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # создаем рядок со сзначений StandartItemModel
         self.filter_model.appendRow([QtGui.QStandardItem(0) for _ in range(self.origin_table_model.columnCount())])
 
-    def create_filter_view(self,focused_box):
+    def create_filter_view(self, focused_box):
         # вставляем модель в tableview
         self.filter_view.setModel(self.filter_model)
 
@@ -48,7 +58,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         for col in range(self.filter_model.columnCount()):  # bc checkbox "CHECKBOX_INDEX" col
             filter_text = MyLineEdit(self.table_view.window(), 0, col)
 
-            filter_text.setMinimumWidth(1) # для чекбокса поля CHk
+            filter_text.setMinimumWidth(1)  # для чекбокса поля CHk
             # добавляем его в таблицу
             self.filter_view.setIndexWidget(self.filter_model.index(0, col), filter_text)
             # меняем значение фильтра по Умолчанию под название колонок
@@ -78,37 +88,31 @@ class FilterBoxes(QtWidgets.QMainWindow):
 
     def filter_text_edited(self):
 
+        # Если фильтр ещё неактивен - добавить в очередь активности фильтров
+        if not self.active_filters.get(self.sender()):
+            self.active_filters[self.sender()] = None
+
         if DEBUG: print("Text change event (filter_text_edited)")
         text = self.sender().text()
 
-        # TODO вынести за функцию
-        model_for_filter = self.origin_table_model
-        model_for_filter.fetchTable()
-        if len(self.active_filters) > 1:
-            model_for_filter = self.active_filters[-1][1]
+        # TODO Сделать нодами
+        # если текст удаляется - удаляем и фильтр в очереди активности
+        if text == "":
+            ord_list = list(self.active_filters.items())
+            ind = ord_list.index(self.sender())
+
+
+        if len(self.active_filters) > 2:
+            # предпоследний фильтр
+            val = list(self.active_filters.items())[-2][0]
+            # модель предпоследнего фильтра
+            model_for_filter = self.active_filters[val]
 
         # если текст предыдущего фильтра есть в текущем,
         # не нужно перебирать всю таблицу снова\
         if self.last_filter in text:
             model_for_filter = self.table_view.model()
         self.last_filter = text
-
-        # if self.last_filter in text:
-        #     if not self.active_filters:
-        #         model_for_filter = self.origin_table_model
-        #     else:
-        #         model_for_filter = self.active_filters[-1][1]
-        # else:
-        #     model_for_filter = self.active_filters[-1][1]
-
-
-        # прокручиваем к низу все данные в модели
-        # try:
-        #     model_for_filter.fetchTable()
-        # except:
-        #     pass
-        # model_for_filter = self.table_view.model()
-
 
         # # фильтруем модель СПОСОБ №1
         # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
@@ -126,15 +130,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         proxy_model.setSourceModel(model_for_filter)  # что фильтруем?
         self.table_view.setModel(proxy_model)  # Вот вам отфильтрованное
 
-        # анализируем все существующие фильтры
-        find_filter = False
-        for filter in self.active_filters:
-            if filter[0] == self.sender():
-                filter[1] = proxy_model
-                find_filter = True
-        # если ещё нет фильтра на колонке - добавляем
-        if not find_filter: self.active_filters.append([self.sender(), proxy_model])
-
+        self.active_filters[self.sender()] = proxy_model
 
     def clearFilters(self):
         self.active_filters = []
@@ -180,3 +176,10 @@ class MyLineEdit(QtWidgets.QLineEdit):
         self.setText(str(head))
         # Устанавливаем цвет текста в поле, серым
         self.setStyleSheet("color: #A9A9A9")
+
+class FilterNode():
+
+    def __init__(self,box,model,next_node=None):
+        self.filter_box = box
+        self.filter_model = model
+        self.next_node = next_node
