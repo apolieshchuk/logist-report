@@ -81,7 +81,8 @@ class FilterBoxes(QtWidgets.QMainWindow):
         if DEBUG: print("Text change event (filter_text_edited)")
         text = self.sender().text()
 
-        !!# TODO вынести за функцию
+        !!#
+        # TODO вынести за функцию
         model_for_filter = self.origin_table_model
         model_for_filter.fetchTable()
         if len(self.active_filters) > 1:
