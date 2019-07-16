@@ -91,16 +91,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # Скрываем колонку ID
         self.table_view.hideColumn(0)
 
-        # меняем колонки местами (чекбокс вперед)
-        # self.table_view.horizontalHeader().moveSection(CHECKBOX_COLUMN, 0)
-
-        # создаем чекбокс Делегат
-        # delegate = CheckBoxDelegate(None)
-        # self.table_view.setItemDelegateForColumn(COLUMNS_MAIN.index("v"), delegate)
-
-        # делаем слушатели tableview
-        # self.table_view.clicked.connect(self.table_clicked)
-
         # меняем шрифт шапки
         self.table_view.horizontalHeader().setFont(TITLE_FONT)
 
@@ -115,8 +105,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         # включаем сортировку
         self.table_view.sortByColumn(COLUMNS_AUTO.index("Назва"), QtCore.Qt.AscendingOrder)
 
-        # удлиняем строки по содержимому
-        # self.table_view.resizeRowsToContents()
 
     def move_view_columns(self, *views):
         for el in views:
@@ -134,13 +122,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
         # убираем фильтр с колонок
         self.filter_box.clearFilters()
+        # для того что б убрались флажки!
+        self.table_view.model().select()
 
-        # self.table_model.setFilter("")
-        # пересоздаем окно и обнуляем список выделения
-        # self.table_model.select()
-        # TODO Долго ресайзит роус ту контентс
-        # self.table_view.setModel(self.table_model)
-        # self.table_view.resizeRowsToContents()
 
     def copy_in_bufer(self,*info):
         buf = ""
