@@ -20,8 +20,8 @@ class FilterBoxes(QtWidgets.QMainWindow):
         except:
             pass
 
-        self.filter_root = FilterNode(None,table_view.model())
-        # self.current_filter_node = self.filter_root
+        self.filter_root = FilterNode(None,self.origin_table_model)
+        self.curr_filter_node = self.filter_root
         # self.active_filters = OrderedDict()  # очередь фильтров
         # self.active_filters['root'] = self.origin_table_model  # корень, основная таблица под фильтрацию
 
@@ -87,29 +87,32 @@ class FilterBoxes(QtWidgets.QMainWindow):
 
     def filter_text_edited(self):
 
-        node = self.find_filter_node(self.sender())
-
-        # # фильтруем модель СПОСОБ №1
-        # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
-        # self.table_view.resizeRowsToContents()  # расширяем строки по содержимому
         text = self.sender().text()
-        # фильтруем модель СПОСОБ №2
-        # делаем реджекс выражение
-        regex = ""
-        for c in text:
-            regex += f"[{c.lower()}{c.upper()}]"
-        # строим модель прокси фильтра
-        proxy_model = QtCore.QSortFilterProxyModel()
-        proxy_model.setFilterRegExp(regex)
-        proxy_model.setFilterKeyColumn(self.sender().col)
-        proxy_model.setSourceModel(node.model)  # что фильтруем?
-        self.table_view.setModel(proxy_model)  # Вот вам отфильтрованное
-        !!
-        if node.last_text in text:
-            node.model = proxy_model
-        else:
-            node.model = self.filter_root.model
-        node.last_text = text
+
+        self.curr_filter_node = self.find_filter_node(self.sender())
+        node = self.curr_filter_node
+
+        # Проверка для того что б не фильтровать потворно всю таблицу
+        # если слово продолжается
+        if node.text not in text:
+            node.model = node.prev.model
+
+        node.text = text
+
+
+        filter_model = None
+        cur_node = node
+        while cur_node:
+            filter_model = self.do_filter(cur_node)
+            if cur_node.next:
+                cur_node.next.model = filter_model
+            cur_node = cur_node.next
+
+        self.table_view.setModel(filter_model)  # Вот вам отфильтрованное
+
+        # if node.text not in text:
+        #     node.model = node.prev.model
+
 
     def find_filter_node(self,box):
         cur_node = self.filter_root
@@ -119,12 +122,32 @@ class FilterBoxes(QtWidgets.QMainWindow):
                 return cur_node
             last_node = cur_node
             cur_node = cur_node.next
-        new_node = FilterNode(box,self.table_view.model())
+        new_node = FilterNode(box,self.table_view.model(),None,last_node)
         last_node.next = new_node
         return new_node
 
+    def do_filter(self,node):
+
+        # # фильтруем модель СПОСОБ №1
+        # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
+        # self.table_view.resizeRowsToContents()  # расширяем строки по содержимому
+
+        # делаем реджекс выражение
+        regex = ""
+        for c in node.text:
+            regex += f"[{c.lower()}{c.upper()}]"
+        # строим модель прокси фильтра
+        proxy_model = QtCore.QSortFilterProxyModel()
+        proxy_model.setFilterRegExp(regex)
+        proxy_model.setFilterKeyColumn(node.box.col)
+        proxy_model.setSourceModel(node.model)  # что фильтруем?
+        node.model = proxy_model
+        return proxy_model
+
     def clearFilters(self):
-        self.active_filters = []
+        self.curr_filter_node = self.filter_root
+        self.filter_root.next = None
+        self.table_view.setModel(self.curr_filter_node.model)
         # убираем фильтр с колонок
         for col in range(2, self.filter_model.columnCount()):
             pos = (0, col)
@@ -170,8 +193,9 @@ class MyLineEdit(QtWidgets.QLineEdit):
 
 class FilterNode():
 
-    def __init__(self,box,model,next=None):
+    def __init__(self,box,model,next=None,prev=None):
         self.box = box
         self.model = model
-        self.last_text = ""
+        self.text = ""
         self.next = next
+        self.prev = prev

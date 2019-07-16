@@ -166,9 +166,9 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
 
         # self.table_model.setFilter("")
         # пересоздаем окно и обнуляем список выделения
-        self.table_model.select()
+        # self.table_model.select()
         # TODO Долго ресайзит роус ту контентс
-        self.table_view.setModel(self.table_model)
+        # self.table_view.setModel(self.table_model)
         # self.table_view.resizeRowsToContents()
 
     def copy_in_bufer(self,*info):
