@@ -20,7 +20,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         except:
             pass
 
-        self.filter_root = FilterNode(None,self.origin_table_model)
+        self.filter_root = FilterNode(None, self.origin_table_model)
         self.curr_filter_node = self.filter_root
         # self.active_filters = OrderedDict()  # очередь фильтров
         # self.active_filters['root'] = self.origin_table_model  # корень, основная таблица под фильтрацию
@@ -99,7 +99,6 @@ class FilterBoxes(QtWidgets.QMainWindow):
 
         node.text = text
 
-
         filter_model = None
         cur_node = node
         while cur_node:
@@ -113,8 +112,7 @@ class FilterBoxes(QtWidgets.QMainWindow):
         # if node.text not in text:
         #     node.model = node.prev.model
 
-
-    def find_filter_node(self,box):
+    def find_filter_node(self, box):
         cur_node = self.filter_root
         last_node = None
         while cur_node:
@@ -122,11 +120,11 @@ class FilterBoxes(QtWidgets.QMainWindow):
                 return cur_node
             last_node = cur_node
             cur_node = cur_node.next
-        new_node = FilterNode(box,self.table_view.model(),None,last_node)
+        new_node = FilterNode(box, self.table_view.model(), None, last_node)
         last_node.next = new_node
         return new_node
 
-    def do_filter(self,node):
+    def do_filter(self, node):
 
         # # фильтруем модель СПОСОБ №1
         # model_for_filter.setFilter(f"{self.sql_table_header[self.sender().col]} LIKE '%{text}%'")
@@ -191,9 +189,10 @@ class MyLineEdit(QtWidgets.QLineEdit):
         # Устанавливаем цвет текста в поле, серым
         self.setStyleSheet("color: #A9A9A9")
 
+
 class FilterNode():
 
-    def __init__(self,box,model,next=None,prev=None):
+    def __init__(self, box, model, next=None, prev=None):
         self.box = box
         self.model = model
         self.text = ""

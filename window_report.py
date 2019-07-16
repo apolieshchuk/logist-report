@@ -53,6 +53,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         self.excel_but.clicked.connect(self.export_to_excel)
         self.autoInTime_but.clicked.connect(self.autoInTime_report)
         self.autoToday_but.clicked.connect(lambda : self.autoInTime_report(True))
+        self.clear_filer_but.clicked.connect(lambda : self.filter_box.clearFilters())
 
         # TODO вывод в иксель даті в правильном формате
 

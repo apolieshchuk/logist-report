@@ -18,25 +18,32 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="excel_but">
-        <property name="text">
-         <string>В excel</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
          <widget class="QPushButton" name="autoToday_but">
           <property name="text">
            <string>Авто сегодня</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="1" column="1">
          <widget class="QPushButton" name="autoInTime_but">
           <property name="text">
            <string>Авто за период</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="excel_but">
+          <property name="text">
+           <string>В excel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="clear_filer_but">
+          <property name="text">
+           <string>Очистить фльтр</string>
           </property>
          </widget>
         </item>

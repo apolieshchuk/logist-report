@@ -123,35 +123,6 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             el.horizontalHeader().moveSection(COLUMNS_AUTO.index("v2"), 7)
 
 
-    def table_clicked(self, index_in_view):
-        pass
-        # if index_in_view.column() == COLUMNS_MAIN.index("v"):
-        #     print(self.table_model.checkeable_data)
-        # if index_in_view.column() == COLUMNS_MAIN.index("v"):
-        #     print(self.table_model.checkeable_data)
-        #     # берем текущую VIEW модель (на случай фильтра в том числе)
-        #     model = self.table_view.model()
-        #     # берем нужную клетку с уникальным полем "id"
-        #     cell = model.index(index_in_view.row(), 0)
-        #     # считываем уникальный ID
-        #     id = cell.data()
-        #     print(id)
-        # ПРОРАБОТАТЬ ЕСЛИ КОЛОНКА УДАЛИТСЯ!!
-        # При клике на флажок добавляет рядок в "отмеченные"
-        # if index_in_view.column() == COLUMNS_MAIN.index("v"):  # если кликают на колонку checkbox
-        #     # берем текущую VIEW модель (на случай фильтра в том числе)
-        #     model = self.table_view.model()
-        #     # берем нужную клетку с уникальным полем "id"
-        #     cell = model.index(index_in_view.row(), 0)
-        #     # считываем уникальный ID
-        #     id = cell.data()
-        #
-        #     if index_in_view.data():  # если колонка чекбокса - НЕ 0
-        #         self.checked_ids.add(id)
-        #     else:
-        #         self.checked_ids.remove(id)
-        #     if DEBUG: print("Checked rows", self.checked_ids)
-
     # КНОПКИ ГЛАВНОГО ОКНА
     def clear_check_and_filters(self):
 
