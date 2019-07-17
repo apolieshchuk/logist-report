@@ -15,10 +15,6 @@ class FilterBoxes(QtWidgets.QMainWindow):
         self.filter_view = filter_view  # вид фильтра
         self.table_view = table_view  # tableView по которому делаем фильтр
         self.origin_table_model = table_view.model()  # таблица по которой делаем фильтр
-        try:
-            self.origin_table_model.fetchTable()
-        except:
-            pass
 
         self.filter_root = FilterNode(None, self.origin_table_model)
         self.curr_filter_node = self.filter_root
@@ -81,7 +77,8 @@ class FilterBoxes(QtWidgets.QMainWindow):
         taker_view.resizeRowsToContents()
 
         # уравниваем ширину верхней и нижней таблиц
-        tabl_head_width = giver_view.verticalHeader().width()
+        # tabl_head_width = giver_view.verticalHeader().width()
+        tabl_head_width = 30
         taker_view.verticalHeader().setMinimumWidth(tabl_head_width)
         taker_view.verticalHeader().setMaximumWidth(tabl_head_width)
 
@@ -101,6 +98,10 @@ class FilterBoxes(QtWidgets.QMainWindow):
 
         filter_model = None
         cur_node = node
+        try:
+            node.model.fetchTable()
+        except:
+            pass
         while cur_node:
             filter_model = self.do_filter(cur_node)
             if cur_node.next:

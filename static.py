@@ -45,7 +45,7 @@ def create_table_model(DB,table):
     table_model = MySqlTableModel(None, DB, table)
     table_model.setTable(table)
     table_model.setEditStrategy(QtSql.QSqlTableModel.OnFieldChange)
-    table_model.select()
+    # table_model.select() # TODO закоммичено
 
     # создаем горизонтальную шапку
     head = None

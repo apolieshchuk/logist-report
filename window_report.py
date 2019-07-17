@@ -36,10 +36,14 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         from window_main import mysql
         self.table_model = create_table_model(mysql.DB, 'reptable')
         self.create_table_view()
+        self.table_model.select()
+
 
         # создаем фильтр боксы
         self.filter_box = FilterBoxes(self.filter_view, self.table_view)
         self.table_view.setFilterBox(self.filter_box)
+
+
 
         # сортировка таблицы
         # self.table_model.setSort(1,QtCore.Qt.DescendingOrder)
@@ -61,7 +65,6 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # Закрываем созданый в конструкторе класс и создаем вместо него другой
         self.table_view.close()
-
         self.table_view = MyTableView(self.centralwidget)
         self.table_view.setSortingEnabled(False)
         self.table_view.setObjectName("table_view")
@@ -86,16 +89,21 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
         #                                          DateFormatDelegate('dd/MMM/yyyy'))
 
         # расширяем строки и столбцы
-        self.table_view.resizeColumnsToContents()
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("Дата"), 70)
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("Менеджер"), 80)
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("Культура"), 70)
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Тел"), 95)
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("ф2"), 5)
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("ф1"), 5)
+        self.table_view.setColumnWidth(COLUMNS_REPORT.index("ТР"), 5)
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Перевозчик"), 200)
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Маршрут"), 240)
         self.table_view.setColumnWidth(COLUMNS_REPORT.index("Примітка"), 180)
 
         # Расширяем окно, согласно длинны таблицы
         table_width = table_size(self.table_view)
-        # устанавливаем ширину окна
-        self.setFixedWidth(table_width)
+        # устанавливаем ширину окна #TODO +30плохо
+        self.setFixedWidth(table_width+30)
 
         # фильтруем по установленному диапазону дат
         self.start_date_edit()

@@ -99,8 +99,8 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         table_width = table_size(self.table_view)
         # лейаут кнопок
         but_width = self.copy_checked_but.width()
-        # устанавливаем ширину окна
-        self.setFixedWidth(table_width + but_width)
+        # устанавливаем ширину окна #TODO +30 плохо
+        self.setFixedWidth(table_width + but_width +30)
 
         # включаем сортировку
         self.table_view.sortByColumn(COLUMNS_AUTO.index("Назва"), QtCore.Qt.AscendingOrder)
@@ -144,7 +144,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
             qdate = QtCore.QDate().fromString(info[0],"yyyy-MM-dd")
             date = qdate.toString('dd/MMM/yyyy')
 
-            info_str = f"{date} {info[1]}" + "\n"
+            info_str = f"{date} {info[1]} " + "\n\n"
             buf = info_str + buf
 
         pyperclip.copy(buf)

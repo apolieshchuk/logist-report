@@ -25,6 +25,7 @@ class RoutesWindow(QtWidgets.QDialog, design_routes_dial.Ui_Dialog):
 
 
     def create_table_view(self):
+        self.table_model.select()
         # ------------- ВИЗУАЛИЗАЦИЯ---------------------
 
         # вставляем модель в tableview

@@ -78,4 +78,3 @@ class Ui_ReportWindow(object):
         self.clear_filer_but.setText(_translate("ReportWindow", "Очистить фльтр"))
         self.label_2.setText(_translate("ReportWindow", "От"))
         self.label.setText(_translate("ReportWindow", "До"))
-
