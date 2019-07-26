@@ -24,7 +24,7 @@ class ReportWindow(QtWidgets.QMainWindow, design_report.Ui_ReportWindow):
 
         # TODO вынести в функцию
         # устанавливаем диапазон дат по умолчанию
-        date1 = QtCore.QDate.currentDate().addMonths(-6)
+        date1 = QtCore.QDate.currentDate().addMonths(-2)
         date2 = QtCore.QDate.currentDate().addDays(+1)
         self.dateEdit.setDate(date1)
         self.dateEdit_2.setDate(date2)

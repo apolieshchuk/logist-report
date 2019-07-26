@@ -85,7 +85,7 @@ class LogistReportWindow(QtWidgets.QMainWindow, design.Ui_Auto):
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("Марка"), 60)  # Марка
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("№ авто"), 80)  # гн Авто
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("№ прич"), 80)  # гн Прицепа
-        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Телефон"), 90)  # тел
+        self.table_view.setColumnWidth(COLUMNS_AUTO.index("Телефон"), 95)  # тел
         self.table_view.setColumnWidth(COLUMNS_AUTO.index("Замітки"), 150)  # вод удостовер
 
         # Скрываем колонку ID
