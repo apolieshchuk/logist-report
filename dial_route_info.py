@@ -3,7 +3,7 @@ import operator
 
 from files.ui import design_route_info
 from PyQt5 import QtWidgets, QtGui, QtCore, QtSql
-from static import TITLE_FONT, ROUTE_INFO_PATTERN, COLUMNS_ROUTE_INFO, MANAGERS, CROPS
+from static import TITLE_FONT, ROUTE_INFO_PATTERN, COLUMNS_ROUTE_INFO, CROPS
 
 DEBUG = True
 
@@ -24,7 +24,10 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
 
         self.date_edit.setDate(QtCore.QDate.currentDate())
 
-        self.manager_box.addItems(sorted(MANAGERS))
+        # берем менеджеров с базы на сервере
+        managers = self.get_managers()
+
+        self.manager_box.addItems(sorted(managers))
         # устанавливаем значение основного менеджера
         try:
             manager = self.most_used_on_route("manager")
@@ -166,6 +169,14 @@ class RouteInfo(QtWidgets.QDialog, design_route_info.Ui_Dialog):
                 d[val] = 1
         return d
 
+    def get_managers(self):
+        from window_main import mysql
+        sql = mysql.DB.exec(f""" SELECT manager FROM managers """)
+        managers = []
+        while sql.next():
+            managers.append(sql.value('manager'))
+        return managers
+
 class MyLineEdit(QtWidgets.QLineEdit):
 
     def __init__(self, QWindow, row, col):
@@ -173,3 +184,4 @@ class MyLineEdit(QtWidgets.QLineEdit):
         self.window = QWindow
         self.row = row
         self.col = col
+
